@@ -1,3 +1,7 @@
+用 Mac 的可能要裝一下 XCode（App Store 裡有），然後下載有手機的那個 simulator 才能邊寫邊看 app 長怎樣
+然後每個頁面是放在 cobuy/app/(tabs) 那一層 
+Love
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
