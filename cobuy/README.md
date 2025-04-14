@@ -1,5 +1,5 @@
-用 Mac 的可能要裝一下 XCode（App Store 裡有），然後下載有手機的那個 simulator 才能邊寫邊看 app 長怎樣
-然後每個頁面是放在 cobuy/app/(tabs) 那一層 
+用 Mac 的可能要裝一下 XCode（App Store 裡有），然後下載有手機的那個 simulator 才能邊寫邊看 app 長怎樣 <br>
+然後每個頁面是放在 cobuy/app/(tabs) 那一層 <br>
 Love
 
 # Welcome to your Expo app 👋
