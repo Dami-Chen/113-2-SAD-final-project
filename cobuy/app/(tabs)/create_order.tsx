@@ -3,7 +3,7 @@ import React from 'react';
 
 const CreateOrder = () => {
     return (
-        <View style={styles.container}>
+        <View style={styles.container} className='flex-1 bg-primary'>
             <Text style={styles.title} className="text-secondary">發起團購訂單</Text>
         </View>
     )

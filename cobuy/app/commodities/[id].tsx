@@ -1,16 +1,20 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, SafeAreaView } from "react-native";
 import React from 'react';
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
-const Details = () => {
+const CommodityDetails = () => {
     const { id } = useLocalSearchParams();
+    const router = useRouter();
 
     return (
-        <View>
-            <Text>商品詳細資訊：{id}</Text>
-        </View>
+    <SafeAreaView className="p-4 flex-1 bg-primary">
+        <Text className="text-xl text-secondary font-bold mb-2">商品詳情</Text>
+        <Text className="text-dark">你選擇的商品 ID 是：{id}</Text>
+        {/* 實際上你可以根據 id 去 fetch 詳細資料 */}
+        <Button title="返回" onPress={() => router.push('/')}/>
+    </SafeAreaView>
     )
 }
 
-export default Details;
+export default CommodityDetails;
 const styles = StyleSheet.create({})

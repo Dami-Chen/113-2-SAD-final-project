@@ -3,7 +3,7 @@ import React from 'react';
 
 const Notification = () => {
     return (
-        <View style={styles.container}>
+        <View style={styles.container} className='flex-1 bg-primary'>
             <Text style={styles.title} className="text-secondary">通知中心</Text>
         </View>
     )

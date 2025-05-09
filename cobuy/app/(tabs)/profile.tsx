@@ -6,7 +6,7 @@ const Profile = () => {
     const {logout} = useAuth();
 
     return (
-        <View style={styles.container}>
+        <View style={styles.container} className='flex-1 bg-primary'>
             <Text style={styles.title} className="text-secondary">個人資訊</Text>
             <Button title="登出" onPress={logout} />
         </View>
