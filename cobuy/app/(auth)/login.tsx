@@ -8,12 +8,12 @@ export default function Login() {
   const { login } = useAuth()
 
   const handleLogin = () => {
-    if (username && password) {
-      login()
-    } else {
-      alert('請輸入帳號與密碼')
-    }
+  if (username && password) {
+    login(username, password);
+  } else {
+    alert('請輸入帳號與密碼');
   }
+};
 
   return (
     <View className="flex-1 justify-center bg-primary px-8">

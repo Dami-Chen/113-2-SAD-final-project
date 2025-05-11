@@ -1,0 +1,63 @@
+const express = require('express');
+const router = express.Router();
+const pool = require('../db');
+const queries = require('../sql/queries');
+
+// 開團
+router.post('/orders', async (req, res) => {
+  const { title, description, creator_id, limit_count, deadline } = req.body;
+  try {
+    await pool.query(queries.createOrder, [title, description, creator_id, limit_count, deadline]);
+    res.status(201).json({ message: '開團成功' });
+  } catch (err) {
+    res.status(500).json({ error: '開團失敗', detail: err.message });
+  }
+});
+
+// 查詢所有團購訂單
+router.get('/orders', async (req, res) => {
+  try {
+    const result = await pool.query(queries.getAllOrders);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: '查詢失敗', detail: err.message });
+  }
+});
+
+// 查詢單一訂單
+router.get('/orders/:id', async (req, res) => {
+  const orderId = req.params.id;
+  try {
+    const result = await pool.query(queries.getOrderById, [orderId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: '找不到訂單' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: '查詢失敗', detail: err.message });
+  }
+});
+
+// 加入訂單
+router.post('/join', async (req, res) => {
+  const { order_id, user_id, quantity } = req.body;
+  try {
+    await pool.query(queries.joinOrder, [order_id, user_id, quantity]);
+    res.status(201).json({ message: '已成功加入訂單' });
+  } catch (err) {
+    res.status(500).json({ error: '加入失敗', detail: err.message });
+  }
+});
+
+// 查某訂單的所有參與者
+router.get('/orders/:id/participants', async (req, res) => {
+  const orderId = req.params.id;
+  try {
+    const result = await pool.query(queries.getParticipantsByOrder, [orderId]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
+  }
+});
+
+module.exports = router;
