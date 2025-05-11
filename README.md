@@ -14,22 +14,22 @@
 
 ### 2. 後端啟動（Express server）
 
-cd server                    # 進入後端資料夾
-npm install                  # 安裝後端相依套件（只需一次）
-node index.js                # 啟動伺服器（預設跑在 localhost:3001）
+cd server                    # 進入後端資料夾  
+npm install                  # 安裝後端相依套件（只需一次）  
+node index.js                # 啟動伺服器（預設跑在 localhost:3001）  
 
-若成功啟動，終端機應會出現：
+若成功啟動，終端機應會出現：  
 Server running on port 3001
 
 ### 3. 啟動前端（React Native + Expo）
 
-（以下是直接用手機瀏覽的方法，因為我的模擬器不是打不開就是很不穩，手機記得載 Expo Go App）
+（以下是直接用手機瀏覽的方法，因為我的模擬器不是打不開就是很不穩，手機記得載 Expo Go App）  
 
-cd app                      # 進入前端資料夾
-npm install                 # 安裝前端相依套件（只需一次）
-npm start                   # 啟動 Expo Server（可掃 QR Code 開啟 App）
+cd app                      # 進入前端資料夾   
+npm install                 # 安裝前端相依套件（只需一次）  
+npm start                   # 啟動 Expo Server（可掃 QR Code 開啟 App）  
 
-若成功，終端機會出現 Expo QR code，手機用 Expo Go App 掃描即可預覽
+若成功，終端機會出現 Expo QR code，手機用 Expo Go App 掃描即可預覽  
 
 ## 🧪 測試帳號
 | 帳號      | 密碼       | 備註      |
