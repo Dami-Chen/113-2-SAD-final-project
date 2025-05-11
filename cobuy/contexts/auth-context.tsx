@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     try {
-      await axios.post('http://192.168.230.248:3001/api/login', { username, password });
+      await axios.post('http://192.168.230.248:3001/api/login', { username, password }); // 填自己的位址，形式像是：http://192.168.X.X:3001/api
       setIsLoggedIn(true);
     } catch (err: any) {
       alert(err.response?.data?.error || '登入失敗');
