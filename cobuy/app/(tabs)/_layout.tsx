@@ -14,12 +14,6 @@ const _Layout = () => {
               }}
             />
             <Tabs.Screen
-              name='profile'
-              options={{
-                title: '我'
-              }}
-            />
-            <Tabs.Screen
               name='create_order'
               options={{
                 title: '新增'
@@ -35,6 +29,12 @@ const _Layout = () => {
               name='history_order'
               options={{
                 title: '我的訂單'
+              }}
+            />
+            <Tabs.Screen
+              name='profile'
+              options={{
+                title: '我'
               }}
             />
         </Tabs>
