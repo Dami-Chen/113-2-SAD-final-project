@@ -13,7 +13,7 @@
 
 // // Create a Provider component
 // export const AuthProvider = ({ children }: { children: ReactNode }) => {
-//   const [isLoggedIn, setIsLoggedIn] = useState(false);
+//   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
 //   const login = () => {
 //     setIsLoggedIn(true);
@@ -28,14 +28,14 @@
 //   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 // };
 
-// // Create a hook for easy usage
-// export const useAuth = () => {
-//   const context = useContext(AuthContext);
-//   if (!context) {
-//     throw new Error('useAuth must be used inside an AuthProvider');
-//   }
-//   return context;
-// };
+// Create a hook for easy usage
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used inside an AuthProvider');
+  }
+  return context;
+};
 
 // contexts/auth-context.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
