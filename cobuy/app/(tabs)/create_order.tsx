@@ -8,8 +8,11 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const CreateOrder = () => {
+  const router = useRouter();
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
       <Text style={styles.title}>發起團購</Text>
@@ -43,7 +46,12 @@ const CreateOrder = () => {
       <TextInput placeholder="備註欄" style={styles.input} />
       <TextInput placeholder="支付方式（例如：現金）" style={styles.input} />
 
-      <TouchableOpacity style={styles.submitBtn}>
+      <TouchableOpacity
+        style={styles.submitBtn}
+        onPress={() => {
+          router.push('/(tabs)/history_order?tab=open');
+        }}
+      >
         <Text style={{ color: '#fff', fontWeight: 'bold' }}>確認發起團購</Text>
       </TouchableOpacity>
     </ScrollView>
