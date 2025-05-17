@@ -1,11 +1,13 @@
 import { View, Text, TextInput, Pressable } from 'react-native'
 import { useState } from 'react'
 import { useAuth } from '../../contexts/auth-context'
+import { useRouter } from 'expo-router';
 
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const { login } = useAuth()
+  const router = useRouter();
 
   const handleLogin = () => {
   if (username && password) {
@@ -38,6 +40,10 @@ export default function Login() {
 
       <Pressable onPress={handleLogin} className="bg-secondary py-3 rounded-lg items-center shadow">
         <Text className="text-primary text-lg font-bold">登入</Text>
+      </Pressable>
+
+      <Pressable onPress={() => router.replace('/(auth)/register')} className="mt-6 items-center">
+        <Text className="text-dark underline">沒有帳號？前往註冊</Text>
       </Pressable>
     </View>
   )

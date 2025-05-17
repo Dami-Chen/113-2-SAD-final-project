@@ -5,9 +5,31 @@ const queries = require('../sql/queries');
 
 // 註冊
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const {
+    username,
+    nickname,
+    real_name,
+    password,
+    email,
+    school,
+    student_id,
+    dorm,
+    score,
+    phone,
+  } = req.body;
   try {
-    await pool.query(queries.createUser, [username, password]);
+    await pool.query(queries.createUser, [
+      username,
+      nickname,
+      real_name,
+      password,
+      email,
+      school,
+      student_id,
+      dorm,
+      score,
+      phone,
+    ]);
     res.status(201).json({ message: '註冊成功' });
   } catch (err) {
     res.status(500).json({ error: '註冊失敗', detail: err.message });

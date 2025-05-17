@@ -28,7 +28,7 @@
 //   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 // };
 
-// // Create a hook for easy usage
+// Create a hook for easy usage
 // export const useAuth = () => {
 //   const context = useContext(AuthContext);
 //   if (!context) {
@@ -47,6 +47,19 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  register: (form: RegisterFormType) => Promise<void>;
+}
+
+export interface RegisterFormType {
+  username: string;
+  password: string;
+  nickname: string;
+  real_name: string;
+  email: string;
+  school: string;
+  student_id: string;
+  dorm: string;
+  phone: string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -56,10 +69,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     try {
-      await axios.post('http://192.168.230.248:3001/api/login', { username, password }); // 填自己的位址，形式像是：http://192.168.X.X:3001/api
+      await axios.post('http://<your en0 inet>/api/login', { username, password });
       setIsLoggedIn(true);
     } catch (err: any) {
       alert(err.response?.data?.error || '登入失敗');
+    }
+  };
+
+  const register = async (form: RegisterFormType) => {
+    try {
+      await axios.post('http://<your en0 inet>/api/register', {
+        ...form,
+        score: 0, // 預設值
+      });
+      alert('註冊成功，請登入');
+    } catch (err: any) {
+      console.error('註冊失敗:', err);
+  
+      const errorMessage =
+        err.response?.data?.error || '註冊失敗';
+      const detailMessage = err.response?.data?.detail;
+  
+      alert(`❌ ${errorMessage}${detailMessage ? `\n原因：${detailMessage}` : ''}`);
     }
   };
 
@@ -68,7 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
