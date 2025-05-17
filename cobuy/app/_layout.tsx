@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { Slot, useRouter, useSegments } from 'expo-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from '../contexts/auth-context'  
 import './globals.css';
 
@@ -9,19 +9,30 @@ function AuthGate() {
   const segments = useSegments()
   const router = useRouter()
 
+  const [isNavigationReady, setNavigationReady] = useState(false);
+
+  // 讓 React Router 完成 hydration 再做導向
   useEffect(() => {
-    const inAuthGroup = segments[0] === '(auth)'
+    const timeout = setTimeout(() => {
+      setNavigationReady(true);
+    }, 0); // 下一個 tick 再執行
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    if (!isNavigationReady) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
 
     if (!isLoggedIn && !inAuthGroup) {
-      router.replace('/(auth)/login')
+      router.replace('/(auth)/login');
+    } else if (isLoggedIn && inAuthGroup) {
+      router.replace('/(tabs)');
     }
+  }, [isLoggedIn, segments, isNavigationReady]);
 
-    if (isLoggedIn && inAuthGroup) {
-      router.replace('/(tabs)')
-    }
-  }, [isLoggedIn, segments])
-
-  return <Slot />
+  return <Slot />;
 }
 
 export default function RootLayout() {
