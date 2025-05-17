@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     try {
-      await axios.post('http://<your en0 inet>/api/login', { username, password });
+      await axios.post('http://<your IP>:3001/api/login', { username, password });
       setIsLoggedIn(true);
     } catch (err: any) {
       alert(err.response?.data?.error || '登入失敗');
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (form: RegisterFormType) => {
     try {
-      await axios.post('http://<your en0 inet>/api/register', {
+      await axios.post('http://<your IP>:3001/api/register', {
         ...form,
         score: 0, // 預設值
       });
