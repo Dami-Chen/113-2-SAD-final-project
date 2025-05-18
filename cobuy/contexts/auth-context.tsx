@@ -8,6 +8,19 @@ interface AuthContextType {
   username: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  register: (form: RegisterFormType) => Promise<void>;
+}
+
+export interface RegisterFormType {
+  username: string;
+  password: string;
+  nickname: string;
+  real_name: string;
+  email: string;
+  school: string;
+  student_id: string;
+  dorm: string;
+  phone: string;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -36,6 +49,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const register = async (form: RegisterFormType) => {
+    try {
+      await axios.post('http://<your IP>:3001/api/register', {
+        ...form,
+        score: 0, // 預設值
+      });
+      alert('註冊成功，請登入');
+    } catch (err: any) {
+      console.error('註冊失敗:', err);
+  
+      const errorMessage =
+        err.response?.data?.error || '註冊失敗';
+      const detailMessage = err.response?.data?.detail;
+  
+      alert(`❌ ${errorMessage}${detailMessage ? `\n原因：${detailMessage}` : ''}`);
+    }
+  };
+
   const logout = () => {
     setIsLoggedIn(false);
     setUsername(null);
@@ -45,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username }}>
+    <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register}}>
       {children}
     </AuthContext.Provider>
   );
