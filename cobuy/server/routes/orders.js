@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const queries = require('../sql/queries');
+const { sendOneSignalNotification } = require('../onesignal');
+const { notifyViaWebSocket } = require('../ws');
 
 // 開團
 router.post('/orders', async (req, res) => {
@@ -42,7 +44,23 @@ router.get('/orders/:id', async (req, res) => {
 router.post('/join', async (req, res) => {
   const { order_id, user_id, quantity } = req.body;
   try {
-    await pool.query(queries.joinOrder, [order_id, user_id, quantity]);
+    await pool.query(queries.joinOrder, [user_id, order_id, quantity]);
+
+    // 查目前參加人數
+    const { rows } = await pool.query(queries.getParticipantsByOrder, [order_id]);
+    const participants = rows.map(r => r.username);
+
+    // 查訂單上限
+    const orderResult = await pool.query(queries.getOrderById, [order_id]);
+    const limit = orderResult.rows[0].stop_at_num;
+
+    if (participants.length >= limit) {
+      const msg = `你參與的拼單已額滿！`;
+
+      notifyViaWebSocket(participants, { type: 'GROUP_FULL', order_id });
+      await sendOneSignalNotification(participants, msg);
+    }
+
     res.status(201).json({ message: '已成功加入訂單' });
   } catch (err) {
     res.status(500).json({ error: '加入失敗', detail: err.message });
