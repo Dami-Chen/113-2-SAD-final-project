@@ -86,7 +86,7 @@ const _Layout = () => {
               color={focused ? '#B38F7D' : '#AAA'}
             />
           ),
-          title: '歷史訂單'
+          title: '我的團購'
         }}
       />
       <Tabs.Screen
