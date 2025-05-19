@@ -37,7 +37,8 @@ import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from '../contexts/auth-context';
 import './globals.css';
 
-import OneSignal from 'react-native-onesignal';
+import { OneSignal } from 'react-native-onesignal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function AuthGate() {
   const { isLoggedIn } = useAuth();
@@ -83,22 +84,21 @@ function AppInitializer() {
   const { isLoggedIn } = useAuth();
 
   useEffect(() => {
-    // 初始化 OneSignal
-    OneSignal.setAppId('3075acf3-0518-4ac3-9aeb-c1115ab2fb05');
+  OneSignal.initialize('3075acf3-0518-4ac3-9aeb-c1115ab2fb05');
+  OneSignal.User.addTag('disable_analytics', 'true');
 
-    // 啟用通知權限（會自動判斷平台）
-    OneSignal.promptForPushNotificationsWithUserResponse();
-
-    // 登入狀態綁定用戶（OneSignal.login 必須是字串 ID）
-    if (isLoggedIn) {
-      // 你可能需要從 localStorage 或 context 抓 user.username
-      // 假設你有 user.username，可以在這裡寫：
-      const userId = localStorage.getItem('username'); // ← 根據你自己的邏輯調整
-      if (userId) {
-        OneSignal.login(userId);
-      }
+  async function requestPermission() {
+    try {
+      const granted = await OneSignal.Notifications.requestPermission(true);
+      console.log('推播權限是否授予:', granted);
+    } catch (error) {
+      console.warn('推播權限請求失敗:', error);
     }
-  }, [isLoggedIn]);
+  }
+
+  requestPermission();
+
+}, [isLoggedIn]);
 
   return <AuthGate />;
 }
