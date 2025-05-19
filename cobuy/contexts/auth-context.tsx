@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import axios from 'axios';
-import OneSignal from 'react-native-onesignal';
+import { OneSignal } from 'react-native-onesignal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -26,9 +27,23 @@ export interface RegisterFormType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // 開發階段寫死 true，實作時請修正
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      const storedUsername = await AsyncStorage.getItem('username');
+      if (storedUsername) {
+        setUsername(storedUsername);
+        setIsLoggedIn(true);
+        OneSignal.login(storedUsername);
+      }
+      setIsAuthReady(true);
+    };
+    restoreSession();
+  }, []);
+
 
   const login = async (username: string, password: string) => {
     try {
@@ -37,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUsername(username);
 
       // 儲存 username 給 OneSignal 使用（App 初始化時可以抓到）
-      localStorage.setItem('username', username);
+      await AsyncStorage.setItem('username', username);
 
       // 綁定 OneSignal 使用者 ID
       OneSignal.login(username);
@@ -50,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (form: RegisterFormType) => {
     try {
-      await axios.post('http://<your IP>:3001/api/register', {
+      await axios.post('http://172.20.10.12:3001/api/register', {
         ...form,
         score: 0, // 預設值
       });
@@ -66,10 +81,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     setIsLoggedIn(false);
     setUsername(null);
-    localStorage.removeItem('username');
+    await AsyncStorage.removeItem('username');
     OneSignal.logout(); // 清除 OneSignal 綁定
     setIsAuthReady(true);
   };

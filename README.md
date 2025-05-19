@@ -4,6 +4,11 @@
 
 ## 🚀 專案啟動流程
 
+### ‼️因為要用到 OneSignal，這個套件沒辦法直接用 expo 跑，所以要改成用 expo-dev
+
+npx expo run:ios         # 跑 ios stimulator
+npx expo run:android     # 跑 android stimulator
+
 ### 1. 安裝必要套件（請確認都已安裝）
 
 | 工具                   | 安裝指令                                     | 說明                 |
