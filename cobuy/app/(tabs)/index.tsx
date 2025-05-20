@@ -92,7 +92,12 @@ export default function HomeScreen() {
 
   // 標籤列
   const renderTags = () => (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagRow}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.tagRowContainer}
+      contentContainerStyle={styles.tagRowContent}
+    >
       {tags.map((t) => (
         <View key={t} style={styles.tag}>
           <Text style={styles.tagText}>#{t}</Text>
@@ -184,9 +189,15 @@ export default function HomeScreen() {
           >
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
-                <Pressable onPress={() => setModalVisible(false)} style={styles.modalClose}>
-                  <Text style={styles.modalCloseText}>×</Text>
-                </Pressable>
+                <View style={styles.modalHeader}>
+                  <Pressable onPress={() => setModalVisible(false)}>
+                    <Ionicons name="arrow-back" size={24} color="#333" />
+                  </Pressable>
+                  <Text style={styles.modalHeaderText}>XXX / 每份</Text>
+                  {/* placeholder for spacing */}
+                  <View style={{ width: 24 }} />
+                </View>
+                <View style={styles.modalDivider} />
                 <Image source={selectedProduct.image} style={styles.modalImage} resizeMode="contain" />
                 <Text style={styles.modalTitle}>{selectedProduct.title}</Text>
                 <View style={styles.detailBox}>
@@ -244,7 +255,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 40,
+    height: 25,
   },
   searchInput: {
     flex: 1,
@@ -260,9 +271,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: 14,
   },
-  tagRow: {
+  tagRowContainer: {
+    marginBottom: 4,
+  },
+  tagRowContent: {
     flexDirection: 'row',
-    marginBottom: 8,
+    justifyContent: 'space-between',
   },
   tag: {
     backgroundColor: '#FFF',
@@ -280,7 +294,8 @@ const styles = StyleSheet.create({
   filterRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 12,
+    alignItems: 'center',
   },
   filterBtn: {
     backgroundColor: '#FFF',
@@ -315,32 +330,6 @@ const styles = StyleSheet.create({
     color: '#999',
     alignSelf: 'flex-end',
   },
-  tabBar: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    height: 56,
-    backgroundColor: '#FFF',
-    borderRadius: 28,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    elevation: 4,
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  fab: {
-    backgroundColor: '#B38F7D',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    marginTop: -28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -361,9 +350,11 @@ const styles = StyleSheet.create({
     color: '#999',
   },
   modalImage: {
-    width: '100%',
-    height: 200,
-    marginBottom: 16,
+    width: '80%',          // reduce width so there's padding on sides
+    height: 200,           // keep height
+    alignSelf: 'center',   // center horizontally
+    marginTop: 16,         // add top margin below divider
+    marginBottom: 16,      // maintain bottom margin before title
   },
   modalTitle: {
     fontSize: 18,
@@ -410,5 +401,29 @@ const styles = StyleSheet.create({
   modalSubmitText: {
     color: '#fff',
     fontSize: 16,
+  },
+  modalHeader: {
+    width: '109.8%',
+    backgroundColor: '#E0D0C0',
+    padding: 12,
+    marginTop: -16,       // extend up to outer edge
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: -16, // extend sideways to flush outer edges
+  },
+  modalHeaderText: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  modalDivider: {
+    height: 4,
+    backgroundColor: '#B38F7D',
+    marginHorizontal: -16,
   },
 });

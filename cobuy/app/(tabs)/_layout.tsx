@@ -29,7 +29,7 @@ const _Layout = () => {
                 tabBarIcon: ({ focused }) => (
                   <Ionicons
                     name="home-outline"
-                    size={24}
+                    size={30}
                     color={focused ? '#B38F7D' : '#AAA'}
                   />
                 ),
@@ -41,7 +41,7 @@ const _Layout = () => {
                 tabBarIcon: ({ focused }) => (
                   <Ionicons
                     name="notifications-outline"
-                    size={24}
+                    size={30}
                     color={focused ? '#B38F7D' : '#AAA'}
                   />
                 ),
@@ -51,17 +51,17 @@ const _Layout = () => {
             <Tabs.Screen
               name='create_order'
               options={{
-                tabBarIcon: () => <Feather name="plus" size={24} color="#FFF" />,
+                tabBarIcon: () => <Feather name="plus" size={30} color="#FFF" />,
                 tabBarButton: props => (
                   <TouchableOpacity
                     {...props}
                     style={{
                       ...props.style,
-                      top: -20,
+                      top: -10,
                       backgroundColor: '#B38F7D',
                       width: 64,
                       height: 64,
-                      borderRadius: 32,
+                      borderRadius: 36,
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}
@@ -77,7 +77,7 @@ const _Layout = () => {
                 tabBarIcon: ({ focused }) => (
                   <Ionicons
                     name="document-text-outline"
-                    size={24}
+                    size={30}
                     color={focused ? '#B38F7D' : '#AAA'}
                   />
                 ),
@@ -90,7 +90,7 @@ const _Layout = () => {
                 tabBarIcon: ({ focused }) => (
                   <Ionicons
                     name="person-outline"
-                    size={24}
+                    size={30}
                     color={focused ? '#B38F7D' : '#AAA'}
                   />
                 ),
