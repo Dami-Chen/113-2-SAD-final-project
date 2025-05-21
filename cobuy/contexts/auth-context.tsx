@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     try {
-      await axios.post('http://172.20.10.12:3001/api/login', { username, password });
+      await axios.post('https://cobuy.up.railway.app/api/login', { username, password });
 
       setIsLoggedIn(true);
       setUsername(username);
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (form: RegisterFormType) => {
     try {
-      await axios.post('http://172.20.10.12:3001/api/register', {
+      await axios.post('http://cobuy.up.railway.app:8081/api/register', {
         ...form,
         score: 0, // 預設值
       });
