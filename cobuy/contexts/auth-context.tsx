@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (form: RegisterFormType) => {
     try {
-      await axios.post('http://cobuy.up.railway.app:8081/api/register', {
+      await axios.post('https://cobuy.up.railway.app/api/register', {
         ...form,
         score: 0, // 預設值
       });
