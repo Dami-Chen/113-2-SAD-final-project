@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import axios from 'axios';
 import { OneSignal } from 'react-native-onesignal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+const BASE_URL = 'https://cobuy.up.railway.app'; // <== 你的實際網址
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -47,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     try {
-      await axios.post('http://172.20.10.12:3001/api/login', { username, password });
+      await axios.post(`${BASE_URL}/api/login`, { username, password });
 
       setIsLoggedIn(true);
       setUsername(username);
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (form: RegisterFormType) => {
     try {
-      await axios.post('http://172.20.10.12:3001/api/register', {
+      await axios.post(`${BASE_URL}/api/register`, {
         ...form,
         score: 0, // 預設值
       });
