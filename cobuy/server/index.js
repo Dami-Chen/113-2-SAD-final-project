@@ -19,6 +19,6 @@ app.use('/api', userRoutes);
 initWebSocket(server); // 初始化 WebSocket
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
