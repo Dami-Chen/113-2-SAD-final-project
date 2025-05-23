@@ -58,6 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // 綁定 OneSignal 使用者 ID
       OneSignal.login(username);
     } catch (err: any) {
+        console.log("❌ Login error:", err);
       alert(err.response?.data?.error || '登入失敗');
     } finally {
       setIsAuthReady(true);
