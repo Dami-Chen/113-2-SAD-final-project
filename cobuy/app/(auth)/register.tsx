@@ -52,6 +52,10 @@ export default function Register() {
       <View style={styles.button}>
         <Button title="註冊" onPress={handleRegister} />
       </View>
+      
+      <View style={styles.button}>
+        <Button title="已有帳號？前往登入" onPress={() => router.replace('/(auth)/login')} />
+      </View>
     </ScrollView>
   );
 }
