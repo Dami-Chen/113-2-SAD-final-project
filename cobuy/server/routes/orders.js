@@ -8,9 +8,39 @@ const { notifyViaWebSocket } = require('../ws');
 
 // 開團
 router.post('/orders', async (req, res) => {
-  const { title, description, creator_id, limit_count, deadline } = req.body;
+  const { 
+    username, 
+    item_name, 
+    quantity, 
+    total_price,
+    unit_price, 
+    image_url, 
+    description, 
+    deliveryMethod,
+    deliveryPlace,
+    stop_at_num, 
+    stop_at_date,
+    comment, 
+    hashtag, 
+    pay_method 
+  } = req.body;
   try {
-    await pool.query(queries.createOrder, [title, description, creator_id, limit_count, deadline]);
+    await pool.query(queries.createOrder, [
+      username, 
+      item_name, 
+      quantity, 
+      total_price,
+      unit_price, 
+      image_url, 
+      description, 
+      deliveryMethod,
+      deliveryPlace,
+      stop_at_num, 
+      stop_at_date,
+      comment, 
+      hashtag, 
+      pay_method 
+    ]);
     res.status(201).json({ message: '開團成功' });
   } catch (err) {
     res.status(500).json({ error: '開團失敗', detail: err.message });
