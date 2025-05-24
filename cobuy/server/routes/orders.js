@@ -25,7 +25,11 @@ router.post('/orders', async (req, res) => {
     pay_method 
   } = req.body;
   try {
+    const result = await pool.query('SELECT MAX(order_id) AS max_id FROM orders');
+    const maxId = result.rows[0].max_id || 0;
+    const newOrderId = maxId + 1;
     await pool.query(queries.createOrder, [
+      newOrderId,
       username, 
       item_name, 
       quantity, 
