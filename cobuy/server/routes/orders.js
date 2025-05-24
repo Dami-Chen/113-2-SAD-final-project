@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const queries = require('../sql/queries');
-const multer = require('multer');
-const path = require('path');
 const { sendOneSignalNotification } = require('../onesignal');
 const { notifyViaWebSocket } = require('../ws');
 
@@ -79,35 +77,6 @@ router.get('/orders/:id/participants', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
   }
-});
-
-// 圖片本地儲存位置與命名
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // 確保這個資料夾存在
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueName + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage });
-
-// 上傳圖片
-router.post('/upload', upload.single('photo'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: '未收到圖片' });
-  }
-
-  const filename = req.file.filename;
-  const filepath = `/uploads/${filename}`;
-
-  res.status(201).json({
-    message: '圖片上傳成功',
-    filename: req.file.filename,
-    path: `/uploads/${req.file.filename}`,
-  });
 });
 
 module.exports = router;
