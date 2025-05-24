@@ -26,8 +26,15 @@ router.post('/orders', async (req, res) => {
   } = req.body;
   try {
     const result = await pool.query('SELECT MAX(order_id) AS max_id FROM orders');
-    const maxId = result.rows[0].max_id || 0;
-    const newOrderId = maxId + 1;
+    let maxIdStr = result.rows[0].max_id;
+    // Convert string to int safely, fallback to 0 if null or invalid
+    let maxId = 0;
+    if (maxIdStr) {
+      maxId = parseInt(maxIdStr, 10);
+      if (isNaN(maxId)) maxId = 0;
+    }
+    const newOrderId = (maxId + 1).toString(); // convert back to string if needed
+
     await pool.query(queries.createOrder, [
       newOrderId,
       username, 
