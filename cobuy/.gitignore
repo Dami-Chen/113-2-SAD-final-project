@@ -9,6 +9,10 @@ dist/
 web-build/
 expo-env.d.ts
 
+#package
+ios/
+android/
+
 # Native
 *.orig.*
 *.jks
@@ -30,7 +34,7 @@ yarn-error.*
 *.pem
 
 # env files
-.env
+#.env
 .env*.local
 
 # typescript

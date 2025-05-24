@@ -156,62 +156,72 @@ export default function HomeScreen() {
         Keyboard.dismiss();
       }}
     >
-      <ScrollView
-        ref={scrollRef}
-        style={styles.container}
-        contentContainerStyle={{ flexGrow: 1 }}
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 16 }}
+        contentContainerStyle={{
+          paddingBottom: 80,
+          paddingHorizontal: 16,
+          paddingTop: 48,
+          backgroundColor: '#FFF8F0',
+          flexGrow: 1,
+        }}
         keyboardShouldPersistTaps="handled"
-      >
-        {renderHeader()}
-        {renderTags()}
-        {renderFilters()}
-
-        <FlatList
-          data={products}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 16 }}
-          contentContainerStyle={{ paddingBottom: 80 }}
-          renderItem={renderProduct}
-        />
-
-        {selectedProduct && (
-          <Modal
-            visible={modalVisible}
-            animationType="slide"
-            transparent
-            onRequestClose={() => setModalVisible(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <Pressable onPress={() => setModalVisible(false)} style={styles.modalClose}>
-                  <Text style={styles.modalCloseText}>×</Text>
-                </Pressable>
-                <Image source={selectedProduct.image} style={styles.modalImage} resizeMode="contain" />
-                <Text style={styles.modalTitle}>{selectedProduct.title}</Text>
-                <View style={styles.detailBox}>
-                  <Text>商品資訊：...</Text>
-                  <Text>分送方式：...</Text>
-                  <Text>分送地點：...</Text>
-                  <Text>結單方式：...</Text>
-                  <Text>單主的話：...</Text>
-                </View>
-                <View style={styles.quantityBox}>
-                  <TouchableOpacity onPress={() => setQuantity(q => Math.max(1, q - 1))}>
-                    <Text>-</Text>
+        ListHeaderComponent={
+          <>
+            {renderHeader()}
+            {renderTags()}
+            {renderFilters()}
+          </>
+        }
+        renderItem={renderProduct}
+        ListFooterComponent={
+          selectedProduct && (
+            <Modal
+              visible={modalVisible}
+              animationType="slide"
+              transparent
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <Pressable onPress={() => setModalVisible(false)} style={styles.modalClose}>
+                    <Text style={styles.modalCloseText}>×</Text>
+                  </Pressable>
+                  <Image
+                    source={selectedProduct.image}
+                    style={styles.modalImage}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.modalTitle}>{selectedProduct.title}</Text>
+                  <View style={styles.detailBox}>
+                    <Text>商品資訊：...</Text>
+                    <Text>分送方式：...</Text>
+                    <Text>分送地點：...</Text>
+                    <Text>結單方式：...</Text>
+                    <Text>單主的話：...</Text>
+                  </View>
+                  <View style={styles.quantityBox}>
+                    <TouchableOpacity onPress={() => setQuantity((q) => Math.max(1, q - 1))}>
+                      <Text>-</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.quantityNumber}>{quantity}</Text>
+                    <TouchableOpacity onPress={() => setQuantity((q) => q + 1)}>
+                      <Text>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <TextInput style={styles.modalInput} placeholder="留言給單主" />
+                  <TouchableOpacity style={styles.modalSubmit}>
+                    <Text style={styles.modalSubmitText}>送出訂單</Text>
                   </TouchableOpacity>
-                  <Text style={styles.quantityNumber}>{quantity}</Text>
-                  <TouchableOpacity onPress={() => setQuantity(q => q + 1)}>
-                    <Text>+</Text>
-                  </TouchableOpacity>
                 </View>
-                <TextInput style={styles.modalInput} placeholder="留言給單主" />
-                <TouchableOpacity style={styles.modalSubmit}><Text style={styles.modalSubmitText}>送出訂單</Text></TouchableOpacity>
               </View>
-            </View>
-          </Modal>
-        )}
-      </ScrollView>
+            </Modal>
+          )
+        }
+      />
     </Pressable>
   );
 }
