@@ -112,7 +112,7 @@ router.get('/history_order', async (req, res) => {
 });
 
 // 查某使用者參與的所有拼單
-router.get('/joined_order/', async (req, res) => {
+router.get('/joined_order/:id', async (req, res) => {
   const order_id = req.params.id;
   try {
     const result = await pool.query(queries.getOrderById, [order_id]);
