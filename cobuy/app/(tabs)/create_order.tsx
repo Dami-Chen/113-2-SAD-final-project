@@ -14,9 +14,17 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import type { ImagePickerAsset } from 'expo-image-picker';
 import axios from 'axios';
+import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const CreateOrder = () => {
   const [image, setImage] = useState<ImagePickerAsset | null>(null);
+ 
+  const [closingMethod, setClosingMethod] = useState<'quantity' | 'datetime'>('quantity');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -92,7 +100,52 @@ const CreateOrder = () => {
         <TextInput placeholder="分送地點" style={[styles.input, styles.flex1]} />
       </View>
 
-      <TextInput placeholder="結單方式（例如：數量到達上限）" style={styles.input} />
+      <Text style={{ marginBottom: 4, color: '#333' }}>結單方式</Text>
+
+      <View style={styles.radioRow}>
+        <TouchableOpacity
+          style={styles.radioOption}
+          onPress={() => {
+            setClosingMethod('quantity');
+            setShowDatePicker(false);
+          }}
+        >
+          <View style={styles.radioCircle}>
+            {closingMethod === 'quantity' && <View style={styles.radioDot} />}
+          </View>
+          <Text style={styles.radioText}>數量達到上限</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.radioOption}
+          onPress={() => {
+            setClosingMethod('datetime');
+            setShowDatePicker(true);
+          }}
+        >
+          <View style={styles.radioCircle}>
+            {closingMethod === 'datetime' && <View style={styles.radioDot} />}
+          </View>
+          <Text style={styles.radioText}>設定截止時間</Text>
+        </TouchableOpacity>
+      </View>
+
+    {showDatePicker && (
+      <View style={{ marginBottom: 12 }}>
+        <Text style={{ marginBottom: 4, color: '#333' }}>選擇截止時間</Text>
+        <DateTimePicker
+          value={selectedDate || new Date()}
+          mode="datetime"
+          display="default"
+          onChange={(event, date) => {
+            if (event.type === 'set' && date) {
+              setSelectedDate(date);
+            }
+          }}
+        />
+      </View>
+    )}
+
       <TextInput placeholder="備註欄" style={styles.input} />
       <TextInput placeholder="支付方式（例如：現金）" style={styles.input} />
 
@@ -155,6 +208,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
   },
+  radioRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+    marginTop: 12,
+  },
+  radioOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#6c4d3f',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  radioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#6c4d3f',
+  },
+  radioText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 12,
+    overflow: 'hidden',
+    backgroundColor: '#fff', // 強制背景色
+  },
+
 });
 
 export default CreateOrder;

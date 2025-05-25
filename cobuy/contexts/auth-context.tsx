@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await axios.post(`${apiUrl}/api/login`, { username, password });
 
+      await axios.post('http://192.168.1.123:3001/api/login', { username, password }); // 填自己的位址，形式像是：http://192.168.X.X:3001/api
       setIsLoggedIn(true);
       setUsername(username);
 
