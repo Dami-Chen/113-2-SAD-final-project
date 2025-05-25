@@ -133,6 +133,19 @@ router.get('/orders/:id', async (req, res) => {
   }
 });
 
+// 查某訂單的單主
+router.get('/order_host', async (req, res) => {
+  const { username } = req.query;
+  if (!username) {
+    return res.status(400).json({ error: '缺少 username' });
+  }
+  try {
+    const result = await pool.query(queries.getUserProfile, [username]);
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: '查詢失敗', detail: err.message });
+  }
+});
 
 
 
