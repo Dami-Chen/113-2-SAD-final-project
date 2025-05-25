@@ -5,11 +5,53 @@ const queries = require('../sql/queries');
 const { sendOneSignalNotification } = require('../onesignal');
 const { notifyViaWebSocket } = require('../ws');
 
+
 // 開團
 router.post('/orders', async (req, res) => {
-  const { title, description, creator_id, limit_count, deadline } = req.body;
+  const { 
+    username, 
+    item_name, 
+    quantity, 
+    total_price,
+    unit_price, 
+    image_url, 
+    description, 
+    deliveryMethod,
+    deliveryPlace,
+    stop_at_num, 
+    stop_at_date,
+    comment, 
+    hashtag, 
+    pay_method 
+  } = req.body;
   try {
-    await pool.query(queries.createOrder, [title, description, creator_id, limit_count, deadline]);
+    const result = await pool.query('SELECT MAX(order_id) AS max_id FROM orders');
+    let maxIdStr = result.rows[0].max_id;
+    // Convert string to int safely, fallback to 0 if null or invalid
+    let maxId = 0;
+    if (maxIdStr) {
+      maxId = parseInt(maxIdStr, 10);
+      if (isNaN(maxId)) maxId = 0;
+    }
+    const newOrderId = (maxId + 1).toString(); // convert back to string if needed
+
+    await pool.query(queries.createOrder, [
+      newOrderId,
+      username, 
+      item_name, 
+      quantity, 
+      total_price,
+      unit_price, 
+      image_url, 
+      description, 
+      deliveryMethod,
+      deliveryPlace,
+      stop_at_num, 
+      stop_at_date,
+      comment, 
+      hashtag, 
+      pay_method 
+    ]);
     res.status(201).json({ message: '開團成功' });
   } catch (err) {
     res.status(500).json({ error: '開團失敗', detail: err.message });
@@ -39,6 +81,21 @@ router.get('/orders/:id', async (req, res) => {
     res.status(500).json({ error: '查詢失敗', detail: err.message });
   }
 });
+
+// 查詢使用者的所有訂單
+router.get('/orders', async (req, res) => {
+  const { username } = req.body;
+  if (!username) {
+    return res.status(400).json({ error: 'username' });
+  }
+  try {
+    const result = await pool.query(queries.getOrdersByUser, [username]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: '查詢失敗', detail: err.message });
+  }
+});
+
 
 // 加入訂單
 router.post('/join', async (req, res) => {

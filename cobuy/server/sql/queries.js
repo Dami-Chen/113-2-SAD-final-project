@@ -12,7 +12,7 @@ module.exports = {
     FROM users
     WHERE username = $1
   `,
-
+  // title, description, creator_id, limit_count, deadline
   // ======== 開團 Orders ========
   createOrder: `
     INSERT INTO orders (
@@ -25,7 +25,8 @@ module.exports = {
       $6, $7, $8, $9, $10,
       $11, $12, $13, $14, $15
     )
-  `,
+  `
+,
   getAllOrders: `
     SELECT * FROM orders ORDER BY order_id DESC
   `,

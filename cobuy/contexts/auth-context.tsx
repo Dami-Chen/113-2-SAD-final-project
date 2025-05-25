@@ -2,10 +2,9 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import axios from 'axios';
 import { OneSignal } from 'react-native-onesignal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const BASE_URL = 'https://cobuy.up.railway.app'; // <== 你的實際網址
 
 interface AuthContextType {
-  isLoggedIn: boolean;
+  isLoggedIn: boolean | null; // ⬅️ 改為 boolean | null
   isAuthReady: boolean;
   username: string | null;
   login: (username: string, password: string) => Promise<void>;
@@ -26,9 +25,10 @@ export interface RegisterFormType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // ⬅️ 初始為 null
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
 
@@ -39,26 +39,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUsername(storedUsername);
         setIsLoggedIn(true);
         OneSignal.login(storedUsername);
+      } else {
+        setIsLoggedIn(false); // ⬅️ 沒登入時顯式設為 false
       }
       setIsAuthReady(true);
     };
     restoreSession();
   }, []);
 
-
   const login = async (username: string, password: string) => {
     try {
-      await axios.post(`${BASE_URL}/api/login`, { username, password });
+      await axios.post(`${apiUrl}/api/login`, { username, password });
 
       setIsLoggedIn(true);
       setUsername(username);
 
-      // 儲存 username 給 OneSignal 使用（App 初始化時可以抓到）
       await AsyncStorage.setItem('username', username);
-
-      // 綁定 OneSignal 使用者 ID
       OneSignal.login(username);
     } catch (err: any) {
+      console.log("❌ Login error:", err);
       alert(err.response?.data?.error || '登入失敗');
     } finally {
       setIsAuthReady(true);
@@ -67,18 +66,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (form: RegisterFormType) => {
     try {
-      await axios.post(`${BASE_URL}/api/register`, {
+      await axios.post(`${apiUrl}/api/register`, {
         ...form,
-        score: 0, // 預設值
+        score: 0,
       });
       alert('註冊成功，請登入');
     } catch (err: any) {
       console.error('註冊失敗:', err);
-  
-      const errorMessage =
-        err.response?.data?.error || '註冊失敗';
+      const errorMessage = err.response?.data?.error || '註冊失敗';
       const detailMessage = err.response?.data?.detail;
-  
       alert(`❌ ${errorMessage}${detailMessage ? `\n原因：${detailMessage}` : ''}`);
     }
   };
@@ -87,12 +83,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoggedIn(false);
     setUsername(null);
     await AsyncStorage.removeItem('username');
-    OneSignal.logout(); // 清除 OneSignal 綁定
+    OneSignal.logout();
     setIsAuthReady(true);
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register}}>
+    <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register }}>
       {children}
     </AuthContext.Provider>
   );

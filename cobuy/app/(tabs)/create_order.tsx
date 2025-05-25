@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,13 +6,56 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Image, 
+  Alert 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import type { ImagePickerAsset } from 'expo-image-picker';
+import axios from 'axios';
 
 const CreateOrder = () => {
-  const router = useRouter();
+  const [image, setImage] = useState<ImagePickerAsset | null>(null);
 
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert("需要權限", "請允許存取相簿才能上傳圖片。");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      base64: false,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!image) return;
+
+    const formData = new FormData();
+    formData.append('photo', {
+      uri: image.uri,
+      name: 'photo.jpg',
+      type: 'image/jpeg',
+    } as any);
+
+    try {
+      const res = await axios.post('http://192.168.1.124:3001/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      Alert.alert('成功', '圖片已上傳');
+    } catch (err) {
+      Alert.alert('失敗', '圖片上傳失敗');
+    }
+  };
+  const router = useRouter();
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
       <Text style={styles.title}>發起團購</Text>
@@ -25,10 +68,17 @@ const CreateOrder = () => {
         <TextInput placeholder="團購單價" style={[styles.input, styles.flex1]} keyboardType="numeric" />
       </View>
 
-      <TouchableOpacity style={styles.uploadBox}>
+      <TouchableOpacity style={styles.uploadBox} onPress={pickImage}>
         <Ionicons name="cloud-upload-outline" size={24} color="#666" />
         <Text style={{ color: '#666' }}> 上傳照片 </Text>
       </TouchableOpacity>
+
+      {image && (
+        <Image
+          source={{ uri: image.uri }}
+          style={{ width: 200, height: 200, alignSelf: 'center', marginVertical: 10 }}
+        />
+      )}
 
       <TextInput
         placeholder="輸入商品資訊"
