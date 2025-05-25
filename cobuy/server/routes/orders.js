@@ -97,7 +97,7 @@ router.get('/orders', async (req, res) => {
 });
 
 // 查某訂單的所有參與者
-router.get('/joined_order', async (req, res) => {
+router.get('/join', async (req, res) => {
   const orderId = req.params.id;
   try {
     const result = await pool.query(queries.getParticipantsByOrder, [orderId]);
