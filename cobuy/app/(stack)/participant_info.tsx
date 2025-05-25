@@ -7,7 +7,17 @@ import { useState } from 'react';
 
 
 const ParticipantInfo = () => {
-  const { id, orderId } = useLocalSearchParams();
+  const { id, orderId, order } = useLocalSearchParams();
+  let parsedOrder;
+  try {
+    parsedOrder = JSON.parse(decodeURIComponent(order));
+    parsedOrder.createdAt = new Date(parsedOrder.createdAt);
+    parsedOrder.deadline = new Date(parsedOrder.deadline);
+  } catch (e) {
+    console.error('解析 order 失敗：', order);
+    parsedOrder = null;
+  }
+
   const router = useRouter();
 
   // 模擬從 orderId 找出參加者名單，再從中找出這位參加者
@@ -42,7 +52,7 @@ const ParticipantInfo = () => {
         <View>
           <Text style={styles.label}>姓名：{participant.name}</Text>
           <Text style={styles.label}>聯絡方式：{participant.contact}</Text>
-          <Text style={styles.label}>拼單物品：團購物品 {orderId}</Text>
+          <Text style={styles.label}>拼單物品：{parsedOrder.name}</Text>
           <Text style={styles.label}>拼單數量：{participant.quantity}</Text>
         </View>
         <View style={styles.creditCircle}>
@@ -94,7 +104,7 @@ const ParticipantInfo = () => {
                   // 可在這裡呼叫 API 或執行後續動作
                   Alert.alert('已提交棄單原因', cancelReason);
                   setCancelReason('');
-                  router.replace(`/(stack)/open_order_detail?id=${orderId}`);
+                  router.replace(`/(stack)/open_order_detail?id=${orderId}&data=${encodeURIComponent(order)}`);
                 } else {
                   Alert.alert('請填寫原因');
                 }

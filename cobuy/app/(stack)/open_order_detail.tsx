@@ -86,7 +86,7 @@ const OrderDetail = () => {
         <TouchableOpacity
           key={p.id}
           style={styles.participantCard}
-          onPress={() => router.push(`/(stack)/participant_info?id=${p.id}&orderId=${id}`)}
+          onPress={() => router.push(`/(stack)/participant_info?id=${p.id}&orderId=${id}&order=${encodeURIComponent(JSON.stringify(order))}`)}
         >
           <View style={{ flex: 1 }}>
             <Text style={styles.participantName}>{p.name}</Text>
