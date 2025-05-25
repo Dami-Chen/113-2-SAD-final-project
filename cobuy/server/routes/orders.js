@@ -70,9 +70,9 @@ router.get('/orders', async (req, res) => {
 
 // 查詢單一訂單
 router.get('/open_order', async (req, res) => {
-  const orderId = req.params.id;
+  const { username } = req.query;
   try {
-    const result = await pool.query(queries.getOrderById, [orderId]);
+    const result = await pool.query(queries.getOrdersByUser, [username]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: '找不到訂單' });
     }
@@ -112,8 +112,8 @@ router.get('/history_order', async (req, res) => {
 });
 
 // 查某使用者參與的所有拼單
-router.get('/joined_orders/:username', async (req, res) => {
-  const username = req.params;
+router.get('/joined_orders/', async (req, res) => {
+  const username = req.params.username;
   try {
     const result = await pool.query(queries.getOrdersJoinedByUser, [username]);
     res.status(200).json(result.rows);
