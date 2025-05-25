@@ -61,7 +61,7 @@ module.exports = {
     JOIN users u ON jo.username = u.username
     WHERE jo.order_id = $1
   `,
-  // 姓名 聯絡方式 拼單物品 拼單數量
+  
   getOrdersJoinedByUser: `
     SELECT o.*, jo.quantity
     FROM joined_order jo

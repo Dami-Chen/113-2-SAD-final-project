@@ -57,7 +57,7 @@ router.post('/orders', async (req, res) => {
     res.status(500).json({ error: '開團失敗', detail: err.message });
   }
 });
-
+/*
 // 查詢所有團購訂單
 router.get('/orders', async (req, res) => {
   try {
@@ -66,7 +66,7 @@ router.get('/orders', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: '查詢失敗', detail: err.message });
   }
-});
+});*/
 /*
 // 查詢單一訂單
 router.get('/orders/:id', async (req, res) => {
@@ -83,16 +83,41 @@ router.get('/orders/:id', async (req, res) => {
 });*/
 
 // 查詢使用者的所有訂單
-router.get('/orders', async (req, res) => {
-  const { username } = req.body;
+router.get('/history_order', async (req, res) => {
+  const username = req.query.username;
   if (!username) {
     return res.status(400).json({ error: 'username' });
   }
   try {
-    const result = await pool.query(queries.getOrdersByUser, [username]);
-    res.json(result.rows);
+    const hostresult = await pool.query(queries.getOrdersByUser, [username]);
+    const joinResult = await pool.query(queries.getOrdersJoinedByUser, [username]);
+    
+    const hostOrders = hostResult.rows.map(order => ({
+      ...order,
+      order_type: 'host',
+    }));
+
+    const joinOrders = joinResult.rows.map(order => ({
+      ...order,
+      order_type: 'join',
+    }));
+
+    // 3. 合併後回傳
+    const allOrders = [...hostOrders, ...joinOrders];
+    res.status(200).json(allOrders);
   } catch (err) {
     res.status(500).json({ error: '查詢失敗', detail: err.message });
+  }
+});
+
+// 查某使用者參與的所有拼單
+router.get('/joined_orders/:username', async (req, res) => {
+  const username = req.params;
+  try {
+    const result = await pool.query(queries.getOrdersJoinedByUser, [username]);
+    res.status(200).json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: '查詢參與拼單失敗', detail: err.message });
   }
 });
 
@@ -106,6 +131,8 @@ router.get('/orders/:id', async (req, res) => {
     res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
   }
 });
+
+
 
 
 // 加入訂單
