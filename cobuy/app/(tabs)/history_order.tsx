@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,36 +7,58 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useAuth, OrderFormType, JoinOrderType } from '../../contexts/auth-context';  // Adjust path as needed
+import axios from 'axios';
 
-const HistoryOrder = () => {
+export default function HistoryOrder(){
   const router = useRouter();
+  const { historyOrder, username} = useAuth();
   const { tab } = useLocalSearchParams();
   const initialTab = tab === 'join' ? 'join' : 'open';
   const [activeTab, setActiveTab] = useState<'open' | 'join'>(initialTab);
+  const [openOrders, setOpenOrders] = useState<OrderFormType[]>([]);
+  const [joinOrders, setJoinOrders] = useState<OrderFormType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  
 
-  const openOrders = [
-    { id: '1', name: '團購物品 A', current: 3, max: 5, end: '滿 5 人' },
-    { id: '2', name: '團購物品 B', current: 2, max: 4, end: '滿 4 人' },
-  ];
+  useEffect(() => {
+  const loadHistory = async () => {
+    // setLoading(true);
+    // console.log('username:', username);
+    try {
+      const data = await historyOrder(username); // <-- pass username
+      setOpenOrders(data.openOrders);
+      setJoinOrders(data.joinOrders);
+    } catch (err: any) {
+      alert(err.message || '查詢失敗');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const joinOrders = [
-    { id: '10', name: '團購物品 X', current: 1, max: 6, end: '時間截止' },
-    { id: '11', name: '團購物品 Y', current: 4, max: 4, end: '滿額' },
-  ];
+  loadHistory();
+  }, [username]);
 
-  const renderOrderCard = (order, isJoin = false) => (
+
+  const renderOrderCard = (order: OrderFormType, isJoin = false) => (
     <TouchableOpacity
-      key={order.id}
+      key={order.order_id}
       style={styles.card}
       onPress={() =>
-        router.push(`/(stack)/${isJoin ? 'join_order_detail' : 'open_order_detail'}?id=${order.id}`)
+        router.push(`/(stack)/${isJoin ? 'join_order_detail' : 'open_order_detail'}?id=${order.order_id}`)
       }
     >
       <View style={styles.cardTextArea}>
-        <Text style={styles.cardTitle}>{order.name}</Text>
-        <Text style={styles.cardSub}>目前拼單數量：{order.current}/{order.max}</Text>
-        <Text style={styles.cardSub}>結單方式：{order.end}</Text>
-        <View style={styles.progressBar} />
+        <Text style={styles.cardTitle}>{order.item_name}</Text>
+        <Text style={styles.cardSub}>目前拼單數量：{order.quantity}/{order.stop_at_num}</Text>
+        <Text style={styles.cardSub}>結單方式：{order.stop_at_num}</Text>
+        <View style={styles.progressBar} >
+         <View style={[styles.progressFill, {
+            width: `${Math.min(Number(order.quantity) / Number(order.stop_at_num), 1) * 100}%`,
+          }]} />
+         </View>
+      
+      
       </View>
       <View style={styles.cardImageArea}>
         <View style={styles.imageBox}>
@@ -113,6 +135,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
   },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#c59b86',
+    borderRadius: 999,
+  },
 });
 
-export default HistoryOrder;
+

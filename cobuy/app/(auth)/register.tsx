@@ -17,6 +17,7 @@ export default function Register() {
     student_id: '',
     dorm: '',
     phone: '',
+    score: 0,
   });
 
   const handleChange = (key: keyof RegisterFormType, value: string) => {

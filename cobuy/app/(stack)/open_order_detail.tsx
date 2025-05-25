@@ -1,71 +1,105 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth, OrderFormType, JoinOrderType, RegisterFormType } from '../../contexts/auth-context';  // Adjust path as needed
+import axios from 'axios';
 
-const OrderDetail = () => {
+export default function OrderDetail() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams() as {id: string};
+  const { username, openOrderDetail, getParticipantByOrder} = useAuth();
+  const [order, setOrder] = useState<OrderFormType | null>(null);
+  const [participants, setParticipants] = useState<JoinOrderType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 範例拼單者
-  const participants = [
-    { id: '1', name: '小美', quantity: 1, contact: '0912345678', credit: 5 },
-    { id: '2', name: '阿宏', quantity: 2, contact: '0987654321', credit: 4 },
-  ];
+  useEffect(() => {
+    const fetchDetail = async () => {
+      if (!username || !id) {
+        setError('無使用者名稱或訂單ID');
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const orders = (await openOrderDetail(username!)) as unknown as OrderFormType[]; 
+        console.log('🔍 openOrderDetail response', orders);
+        const foundOrder = orders.find(order => order.order_id === id);
+        console.log('🔍 foundOrder', foundOrder);
+        setOrder(foundOrder || null);
+
+        if (foundOrder) {
+          const joins = await getParticipantByOrder(id) as unknown as JoinOrderType[];
+          console.log('🔍 order id', id);
+          console.log('🔍 getParticipantByOrder response', joins);
+          setParticipants(joins);
+        }
+          
+        } catch (err: any) {
+        console.error('❌ Error loading order details:', err);
+        setError(err.message || '無法取得訂單詳情');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetail();
+  }, [username, id]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <TouchableOpacity onPress={() => router.replace('/(tabs)/history_order?tab=open')} style={styles.backButton}>
         <Ionicons name="chevron-back" size={28} color="#6c4d3f" />
       </TouchableOpacity>
-      <Text style={styles.title}>團購物品名稱</Text>
+      <Text style={styles.title}>{order?.item_name || '團購物品名稱'}</Text>
 
       <View style={styles.row}>
         <View style={styles.inputBox}>
           <Text style={styles.label}>物品數量</Text>
-          <Text style={styles.value}>5</Text>
+          <Text style={styles.value}>{order?.quantity ?? '-'}</Text>
         </View>
         <View style={styles.inputBox}>
           <Text style={styles.label}>團購單價</Text>
-          <Text style={styles.value}>$100</Text>
+          <Text style={styles.value}>{order?.unit_price ? `$${order?.unit_price}` : '-'}</Text>
         </View>
       </View>
 
       <Text style={styles.label}>商品資訊</Text>
-      <Text style={styles.textArea}>這是商品資訊的範例文字...</Text>
+      <Text style={styles.textArea}>{order?.information || '無商品資訊'}</Text>
 
       <View style={styles.row}>
         <View style={styles.inputBox}>
           <Text style={styles.label}>分送方式</Text>
-          <Text style={styles.value}>統一配送</Text>
+          <Text style={styles.value}>{order?.share_method || '-'}</Text>
         </View>
         <View style={styles.inputBox}>
           <Text style={styles.label}>分送地點</Text>
-          <Text style={styles.value}>台北車站</Text>
+          <Text style={styles.value}>{order?.share_location || '-'}</Text>
         </View>
       </View>
 
       <Text style={styles.label}>結單方式</Text>
-      <Text style={styles.value}>滿 5 人</Text>
+      <Text style={styles.value}>{order?.stop_at_num !== null ? `滿 ${order?.stop_at_num} 人` : '未設定'}</Text>
 
       <View style={styles.progressBar} />
 
-      <Text style={[styles.label, { marginTop: 16 }]}>拼單人數：2</Text>
+      <Text style={[styles.label, { marginTop: 16 }]}>拼單人數：{participants?.length}</Text>
 
-      {participants.map(p => (
+      {participants?.map(p => (
         <TouchableOpacity
-          key={p.id}
+          key={p.username}
           style={styles.participantCard}
-          onPress={() => router.push(`/(stack)/participant_info?id=${p.id}&orderId=${id}`)}
+          onPress={() => router.push(`/(stack)/participant_info?id=${p.username}&orderId=${id}`)}
         >
           <View style={{ flex: 1 }}>
-            <Text style={styles.participantName}>{p.name}</Text>
+            <Text style={styles.participantName}>{p.username}</Text>
             <Text style={styles.participantSub}>拼單數量：{p.quantity}</Text>
-            <Text style={styles.participantSub}>聯絡方式：{p.contact}</Text>
+            <Text style={styles.participantSub}>聯絡方式：{p.phone}</Text>
           </View>
-          <Text style={styles.creditText}>信用分數 {p.credit}/5</Text>
+          <Text style={styles.creditText}>信用分數 {p.score}/5</Text>
         </TouchableOpacity>
       ))}
     </ScrollView>
@@ -118,4 +152,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default OrderDetail;
+
