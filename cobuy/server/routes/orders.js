@@ -84,12 +84,12 @@ router.get('/orders/:id', async (req, res) => {
 
 // 查詢使用者的所有訂單
 router.get('/history_order', async (req, res) => {
-  const username = req.query.username;
+  const { username } = req.query;
   if (!username) {
     return res.status(400).json({ error: 'username' });
   }
   try {
-    const hostresult = await pool.query(queries.getOrdersByUser, [username]);
+    const hostResult = await pool.query(queries.getOrdersByUser, [username]);
     const joinResult = await pool.query(queries.getOrdersJoinedByUser, [username]);
     
     const hostOrders = hostResult.rows.map(order => ({
@@ -106,6 +106,7 @@ router.get('/history_order', async (req, res) => {
     const allOrders = [...hostOrders, ...joinOrders];
     res.status(200).json(allOrders);
   } catch (err) {
+    console.error('❌ Error in /history_order:', err);
     res.status(500).json({ error: '查詢失敗', detail: err.message });
   }
 });
