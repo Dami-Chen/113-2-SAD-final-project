@@ -82,6 +82,21 @@ router.get('/orders/:id', async (req, res) => {
   }
 });
 
+// 查詢使用者的所有訂單
+router.get('/orders', async (req, res) => {
+  const { username } = req.body;
+  if (!username) {
+    return res.status(400).json({ error: 'username' });
+  }
+  try {
+    const result = await pool.query(queries.getOrdersByUser, [username]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: '查詢失敗', detail: err.message });
+  }
+});
+
+
 // 加入訂單
 router.post('/join', async (req, res) => {
   const { order_id, user_id, quantity } = req.body;

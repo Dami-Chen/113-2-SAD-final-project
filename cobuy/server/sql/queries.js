@@ -26,16 +26,6 @@ module.exports = {
       $11, $12, $13, $14, $15
     )
   `
-  /*createOrder: `
-    INSERT INTO orders (
-      item_name,
-      information,
-      host_username,
-      stop_at_num,
-      stop_at_date
-    )
-    VALUES ($1, $2, $3, $4, $5)
-  `*/
 ,
   getAllOrders: `
     SELECT * FROM orders ORDER BY order_id DESC
