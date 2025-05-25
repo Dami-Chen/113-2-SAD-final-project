@@ -76,7 +76,7 @@ router.get('/open_order', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: '找不到訂單' });
     }
-    res.json(result.rows[0]);
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: '查詢失敗', detail: err.message });
   }
