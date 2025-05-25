@@ -97,10 +97,10 @@ router.get('/orders', async (req, res) => {
 });
 
 // 查某訂單的所有參與者
-router.get('/join', async (req, res) => {
-  const orderId = req.params.id;
+router.get('/join:id', async (req, res) => {
+  const order_id = req.params.id;
   try {
-    const result = await pool.query(queries.getParticipantsByOrder, [orderId]);
+    const result = await pool.query(queries.getParticipantsByOrder, [order_id]);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
