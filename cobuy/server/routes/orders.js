@@ -112,10 +112,10 @@ router.get('/history_order', async (req, res) => {
 });
 
 // 查某使用者參與的所有拼單
-router.get('/joined_orders/', async (req, res) => {
-  const username = req.params.username;
+router.get('/joined_order/', async (req, res) => {
+  const order_id = req.params.id;
   try {
-    const result = await pool.query(queries.getOrdersJoinedByUser, [username]);
+    const result = await pool.query(queries.getOrderById, [order_id]);
     res.status(200).json(result.rows);
   } catch (err) {
     res.status(500).json({ error: '查詢參與拼單失敗', detail: err.message });
