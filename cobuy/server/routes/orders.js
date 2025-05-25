@@ -15,9 +15,9 @@ router.post('/orders', async (req, res) => {
     total_price,
     unit_price, 
     image_url, 
-    description, 
-    deliveryMethod,
-    deliveryPlace,
+    informatoin, 
+    share_method,
+    share_location,
     stop_at_num, 
     stop_at_date,
     comment, 
@@ -43,9 +43,9 @@ router.post('/orders', async (req, res) => {
       total_price,
       unit_price, 
       image_url, 
-      description, 
-      deliveryMethod,
-      deliveryPlace,
+      informatoin, 
+      share_method,
+      share_location,
       stop_at_num, 
       stop_at_date,
       comment, 
@@ -96,6 +96,17 @@ router.get('/orders', async (req, res) => {
   }
 });
 
+// 查某訂單的所有參與者
+router.get('/orders', async (req, res) => {
+  const orderId = req.params.id;
+  try {
+    const result = await pool.query(queries.getParticipantsByOrder, [orderId]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
+  }
+});
+
 
 // 加入訂單
 router.post('/join', async (req, res) => {
@@ -124,15 +135,6 @@ router.post('/join', async (req, res) => {
   }
 });
 
-// 查某訂單的所有參與者
-router.get('/orders/:id/participants', async (req, res) => {
-  const orderId = req.params.id;
-  try {
-    const result = await pool.query(queries.getParticipantsByOrder, [orderId]);
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
-  }
-});
+
 
 module.exports = router;
