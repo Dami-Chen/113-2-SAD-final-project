@@ -12,6 +12,17 @@ module.exports = {
     FROM users
     WHERE username = $1
   `,
+  updateUserProfile: `
+    UPDATE users
+    SET
+      real_name = $2,
+      email = $3,
+      school = $4,
+      student_id = $5,
+      dorm = $6
+    WHERE username = $1;
+  `,
+
   // title, description, creator_id, limit_count, deadline
   // ======== 開團 Orders ========
   createOrder: `
@@ -72,11 +83,12 @@ module.exports = {
     SET quantity = EXCLUDED.quantity
   `,
   getParticipantsByOrder: `
-    SELECT jo.username, u.nickname, jo.quantity
+    SELECT jo.username, u.phone, jo.quantity, u.score
     FROM joined_order jo
     JOIN users u ON jo.username = u.username
     WHERE jo.order_id = $1
   `,
+  
   getOrdersJoinedByUser: `
     SELECT o.*, jo.quantity
     FROM joined_order jo
