@@ -328,6 +328,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useAuth } from '../../contexts/auth-context'; // 請根據你的實際路徑調整
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
@@ -367,6 +368,7 @@ export default function HomeScreen() {
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [excludeOrderIds, setExcludeOrderIds] = useState([]);
 
   // 商品詳細 Modal
   const [modalVisible, setModalVisible] = useState(false);
@@ -383,6 +385,7 @@ export default function HomeScreen() {
   const [searchRecords, setSearchRecords] = useState([]);
   const scrollRef = useRef(null);
   const [searchWrapperY, setSearchWrapperY] = useState(0);
+  const { username } = useAuth(); // 這裡 username 就是目前登入的用戶帳號
 
   // 取得標籤
   useEffect(() => {
@@ -390,6 +393,19 @@ export default function HomeScreen() {
   }, []);
 
   // 取得商品列表
+  useEffect(() => {
+  if (!username) return;
+    fetch(`${apiUrl}/api/history_order?username=${username}`)
+      .then(res => res.json())
+      .then(data => {
+        // join 和 host 都過濾掉
+        const joined = (data || []).filter(o => o.order_type === 'join').map(o => o.order_id);
+        const hosted = (data || []).filter(o => o.order_type === 'host').map(o => o.order_id);
+        setExcludeOrderIds([...joined, ...hosted].map(id => String(id))); // 字串化避免型別 bug
+      })
+      .catch(() => setExcludeOrderIds([]));
+  }, [username]);
+
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -421,12 +437,109 @@ export default function HomeScreen() {
     }
   }, [modalVisible, selectedProductId]);
 
+  const handleJoinOrder = async ({ quantity, message }) => {
+    try {
+      // Debug: 印出目前關鍵變數
+      console.log('apiUrl:', apiUrl);
+      console.log('selectedProductId:', selectedProductId);
+      console.log('selectedProductDetail:', selectedProductDetail);
+      console.log('username:', username, 'quantity:', quantity, 'message:', message);
+
+      // 1. 查詢參與者數量
+      const participantsUrl = `${apiUrl}/api/orders/${selectedProductId}`;
+      console.log('GET participants URL:', participantsUrl);
+      const resParticipants = await fetch(participantsUrl);
+      const participantsText = await resParticipants.text();
+      console.log('participants API 回應:', participantsText);
+
+      let participants = [];
+      try {
+        participants = JSON.parse(participantsText);
+      } catch (err) {
+        console.error('解析 participants 失敗，API 回傳不是 JSON:', participantsText);
+        alert('查詢參與者失敗，API 回傳不是 JSON！');
+        return;
+      }
+
+      const totalJoined = participants.reduce((acc, cur) => acc + Number(cur.quantity), 0);
+      const stopAtNum = selectedProductDetail?.stop_at_num;
+      console.log('已拼總數:', totalJoined, '最大可拼:', stopAtNum);
+
+      if (totalJoined + quantity > stopAtNum) {
+        alert(`剩餘可拼單數量只有 ${stopAtNum - totalJoined}，請重新選擇數量`);
+        return;
+      }
+
+      // 4. 正常送 join API
+      const joinUrl = `${apiUrl}/api/orders/${selectedProductId}/join`;
+      const postBody = { username, quantity, message };
+      console.log('POST join URL:', joinUrl);
+      console.log('POST body:', postBody);
+
+      const res = await fetch(joinUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(postBody)
+      });
+
+      const joinText = await res.text();
+      console.log('join API 回應:', joinText);
+
+      let data = {};
+      try {
+        data = JSON.parse(joinText);
+      } catch (err) {
+        console.error('join API 回傳不是 JSON:', joinText);
+        alert('API 回傳不是 JSON，請檢查路徑與 server 狀態');
+        return;
+      }
+
+      if (res.ok) {
+        alert('成功加入拼單！');
+        setModalVisible(false);
+
+        // 重新刷新商品列表
+        fetchOrders({ search: searchText, tag: selectedTag })
+          .then(setProducts)
+          .catch((err) => setError(err.message));
+      } else {
+        alert(data.error || '加入拼單失敗');
+      }
+    } catch (e) {
+      alert('加入拼單失敗，請稍後再試');
+      console.error('catch error:', e);
+    }
+  };
+
+  const now = new Date();
+  // products 是你的全部商品列表
+  const filteredProducts = products.filter((item) => {
+    // 1. 排除自己已經參加/自己開的單
+    if (excludeOrderIds.includes(String(item.order_id))) return false;
+
+    // 2. 已額滿（如果 stop_at_num !== null && quantity >= stop_at_num）
+    if (
+      item.stop_at_num !== null &&
+      item.stop_at_num !== undefined &&
+      Number(item.quantity) >= Number(item.stop_at_num)
+    ) return false;
+
+    // 3. 已結束（stop_at_date !== null 且 < 現在）
+    if (
+      item.stop_at_date !== null &&
+      item.stop_at_date !== undefined &&
+      new Date(item.stop_at_date) < now
+    ) return false;
+
+    return true; // 都沒中就顯示
+  });
+
   // Header + 搜尋
   const renderHeader = () => (
     <View>
       <View style={styles.header}>
         <Text style={styles.logo}>西敗</Text>
-        <TouchableOpacity onPress={() => router.push('/profile')}>
+        <TouchableOpacity onPress={() => router.push('/profile/info')}>
           <Ionicons name="person-circle-outline" size={28} color="#B38F7D" />
         </TouchableOpacity>
       </View>
@@ -570,8 +683,7 @@ export default function HomeScreen() {
               />
               <TouchableOpacity
                 style={styles.modalSubmit}
-                // TODO: 這裡可以串 order join API
-                onPress={() => alert('送出訂單功能可進一步串接 API')}
+                onPress={() => handleJoinOrder( { quantity, message })}
               >
                 <Text style={styles.modalSubmitText}>送出訂單</Text>
               </TouchableOpacity>
@@ -593,7 +705,8 @@ export default function HomeScreen() {
       {loading && <ActivityIndicator style={{ marginTop: 40 }} />}
       {error && <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>{error}</Text>}
       <FlatList
-        data={products}
+        data={filteredProducts}
+        // data={products}
         keyExtractor={(item) => String(item.order_id)}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 16 }}
