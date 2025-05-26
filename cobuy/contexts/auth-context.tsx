@@ -66,6 +66,7 @@ export interface JoinOrderType {
 const AuthContext = createContext<AuthContextType | null>(null);
 const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // ⬅️ 初始為 null
   const [isAuthReady, setIsAuthReady] = useState(false);
