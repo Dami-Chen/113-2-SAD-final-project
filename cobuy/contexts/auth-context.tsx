@@ -17,6 +17,8 @@ interface AuthContextType {
   openJoinDetail: (order_id: string) =>  Promise<JoinOrderType>;
   getParticipantByOrder: (order_id: string) => Promise<JoinOrderType>
   getHostInfo: (username: string) => Promise<RegisterFormType>;
+  openUserInfo:(username: string) => Promise<RegisterFormType>;
+  updateUserInfo:(form:RegisterFormType) => Promise<void>;
 }
 
 export interface RegisterFormType {
@@ -215,6 +217,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  /// 個人資訊頁面
+  const openUserInfo = async (username: string) => {
+    try{
+      const res = await axios.get(`${apiUrl}/api/userInfo`, {
+      params: { username }
+    });
+      console.log("✅ participantByOrder API response:", res.data);
+      return res.data;
+
+    }
+    catch (err: any) {
+      console.log("❌ fetch participant by order error:", err);
+      throw new Error(err.response?.data?.error || '查詢團購拼單者失敗');
+    }
+  }
+
+  // 更新個人資訊
+  const updateUserInfo = async (form: RegisterFormType) => {
+    try{
+      await axios.post(`${apiUrl}/api/updateUserInfo`, {
+        username,  // host_username
+        real_name: form.real_name,
+        email: form.email,
+        school: form.school,
+        student_id: form.student_id,
+        dorm: form.dorm,
+      });      
+
+    } catch (err: any) {
+      console.log("❌ update user info error:", err);
+      throw new Error(err.response?.data?.error || '更改個人資訊失敗');
+
+    }
+  }
+
   
 
   const logout = async () => {
@@ -227,7 +264,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register, 
-    createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo }}>
+    createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo, 
+    openUserInfo, updateUserInfo}}>
       {children}
     </AuthContext.Provider>
   );

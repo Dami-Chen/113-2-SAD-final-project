@@ -12,6 +12,17 @@ module.exports = {
     FROM users
     WHERE username = $1
   `,
+  updateUserProfile: `
+    UPDATE users
+    SET
+      real_name = $2,
+      email = $3,
+      school = $4,
+      student_id = $5,
+      dorm = $6
+    WHERE host_username = $1;
+  `,
+
   // title, description, creator_id, limit_count, deadline
   // ======== 開團 Orders ========
   createOrder: `
