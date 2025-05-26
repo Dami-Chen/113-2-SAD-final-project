@@ -401,6 +401,7 @@ export default function HomeScreen() {
 
   // 點擊商品時打開 Modal 並抓詳細資料
   const handleOpenProduct = (item) => {
+    console.log('你點的商品', item);
     setSelectedProductId(item.order_id);
     setModalVisible(true);
     setQuantity(1);
@@ -412,8 +413,11 @@ export default function HomeScreen() {
     if (modalVisible && selectedProductId) {
       setDetailLoading(true);
       fetchOrderDetail(selectedProductId)
-        .then(setSelectedProductDetail)
-        .finally(() => setDetailLoading(false));
+        .then((data) => {
+        console.log('Order Detail:', data); // 加這行
+        setSelectedProductDetail(data);
+      })
+      .finally(() => setDetailLoading(false));
     }
   }, [modalVisible, selectedProductId]);
 
@@ -542,7 +546,11 @@ export default function HomeScreen() {
                 <Text>商品資訊：{selectedProductDetail.information}</Text>
                 <Text>分送方式：{selectedProductDetail.share_method}</Text>
                 <Text>分送地點：{selectedProductDetail.share_location}</Text>
-                <Text>結單方式：{selectedProductDetail.stop_at_date}</Text>
+                <Text>結單方式：{selectedProductDetail.stop_at_num != null
+                                ? `數量達到 ${selectedProductDetail.stop_at_num}`
+                                : selectedProductDetail.stop_at_date != null
+                                  ? `${selectedProductDetail.stop_at_date} 截止`
+                                  : '無'}</Text>
                 <Text>單主的話：{selectedProductDetail.comment}</Text>
               </View>
               <View style={styles.quantityBox}>
