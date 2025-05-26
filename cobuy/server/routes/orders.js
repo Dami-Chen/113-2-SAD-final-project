@@ -30,7 +30,7 @@ router.post('/orders', async (req, res) => {
     // Convert string to int safely, fallback to 0 if null or invalid
     let maxId = 0;
     if (maxIdStr) {
-      maxId = parseInt(maxIdStr, 10000);
+      maxId = parseInt(maxIdStr, 10);
       if (isNaN(maxId)) maxId = 0;
     }
     const newOrderId = (maxId + 1).toString(); // convert back to string if needed
