@@ -157,7 +157,7 @@ router.post('/updateUserInfo', async (req, res) => {
     student_id,
     dorm,
   } = req.body;
-
+  
   try {
     await pool.query(queries.updateUserProfile, [
       username,
