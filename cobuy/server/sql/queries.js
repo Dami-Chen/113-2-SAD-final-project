@@ -122,6 +122,6 @@ module.exports = {
       reporter_username, target_username, order_id,
       reason, reported_at, status
     ) VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING *;
+    RETURNING *
   `
 };
