@@ -46,10 +46,10 @@ const Profile = () => {
               </View>
             </View>
           </TouchableOpacity>
-        </View>
-        <View className="bg-[#8B6D5C] py-4 rounded-full items-center mt-4 mb-4">
-          <Text onPress={logout} className="text-white text-lg font-bold">登出</Text>
-        </View>
+          <View className="bg-[#6B6D5C] py-4 rounded-full items-center mt-4 mb-4">
+            <Text onPress={logout} className="text-white text-lg font-bold">登出</Text>
+          </View>
+        </View> 
       </View>
     )
 }
