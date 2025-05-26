@@ -114,5 +114,14 @@ module.exports = {
     SELECT
       (SELECT COUNT(*) FROM orders WHERE host_username = $1) AS created_orders,
       (SELECT COUNT(*) FROM joined_order WHERE username = $1) AS joined_orders
+  `,
+
+  // ======== 棄單相關 =========
+  insertAbandonReport: `
+    INSERT INTO abandon_report (
+      reporter_username, target_username, order_id,
+      reason, reported_at, status
+    ) VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *;
   `
 };

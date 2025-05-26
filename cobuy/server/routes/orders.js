@@ -203,6 +203,28 @@ router.post('/join', async (req, res) => {
   }
 });
 
+// 棄單
+router.post('/api/abandonReport', async (req, res) => {
+  const {
+    reporter_username,
+    target_username,
+    order_id,
+    reason,
+    reported_at,
+    status
+  } = req.body;
 
+  try {
+    const result = await db.query(
+      insertAbandonReport,
+      [reporter_username, target_username, order_id, reason, reported_at, status]
+    );
+
+    res.status(200).json({ message: '報告成功送出', data: result.rows[0] });
+  } catch (error) {
+    console.error('❌ 棄單報告失敗:', error);
+    res.status(500).json({ error: '伺服器內部錯誤，無法送出棄單報告' });
+  }
+});
 
 module.exports = router;

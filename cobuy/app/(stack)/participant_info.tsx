@@ -12,11 +12,9 @@ export default function ParticipantInfo() {
   const [participant, setParticipant] = useState<JoinOrderType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const {getParticipantByOrder} = useAuth();
+  const { getParticipantByOrder, reportAbandon, username: authUsername } = useAuth();
   const [showReasonModal, setShowReasonModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
-
-  
 
   console.log('🔍 ParticipantInfo params:', { username, orderId });
   useEffect(() => {
@@ -129,10 +127,30 @@ export default function ParticipantInfo() {
               onPress={() => {
                 if (cancelReason.trim()) {
                   setShowReasonModal(false);
-                  // 可在這裡呼叫 API 或執行後續動作
-                  Alert.alert('已提交棄單原因', cancelReason);
-                  setCancelReason('');
-                  router.replace(`/(stack)/open_order_detail?id=${orderId}`);
+
+                  if (!authUsername) {
+                    Alert.alert('登入狀態異常，請重新登入');
+                    return;
+                  }
+
+                  const payload = {
+                    reporter_username: authUsername,
+                    target_username: username,
+                    order_id: orderId,
+                    reason: cancelReason,
+                    reported_at: new Date().toISOString(),
+                    status: 'pending',
+                  };
+
+                  reportAbandon(payload)
+                    .then(() => {
+                      Alert.alert('已提交棄單原因', cancelReason);
+                      setCancelReason('');
+                      router.replace(`/(stack)/open_order_detail?id=${orderId}`);
+                    })
+                    .catch((error) => {
+                      Alert.alert('提交失敗', error.message || '無法送出報告');
+                    });
                 } else {
                   Alert.alert('請填寫原因');
                 }
