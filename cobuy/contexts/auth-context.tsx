@@ -18,7 +18,7 @@ interface AuthContextType {
   getParticipantByOrder: (order_id: string) => Promise<JoinOrderType>
   getHostInfo: (username: string) => Promise<RegisterFormType>;
   openUserInfo:(username: string) => Promise<RegisterFormType>;
-  updateUserInfo:(form:RegisterFormType) => Promise<void>;
+  // updateUserInfo:(form:RegisterFormType) => Promise<void>;
 }
 
 export interface RegisterFormType {
@@ -232,7 +232,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(err.response?.data?.error || '查詢團購拼單者失敗');
     }
   }
-
+  /*
   // 更新個人資訊
   const updateUserInfo = async (form: RegisterFormType) => {
     try{
@@ -250,7 +250,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(err.response?.data?.error || '更改個人資訊失敗');
 
     }
-  }
+  }*/
 
   
 
@@ -265,7 +265,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register, 
     createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo, 
-    openUserInfo, updateUserInfo}}>
+    openUserInfo}}>
       {children}
     </AuthContext.Provider>
   );

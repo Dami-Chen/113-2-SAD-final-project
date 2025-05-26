@@ -19,7 +19,7 @@ import { useAuth, OrderFormType, JoinOrderType, RegisterFormType } from '../../c
 export default function UserInfoScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
-  const { openUserInfo, username, getHostInfo, updateUserInfo} = useAuth();
+  const { openUserInfo, username, getHostInfo} = useAuth();
   const [userInfo, setUserInfo] = useState<RegisterFormType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -192,7 +192,7 @@ export default function UserInfoScreen() {
                     // Simulate update API call
                     console.log('🔄 Saving info:', form);
                     
-                    await updateUserInfo(form);
+                    // await updateUserInfo(form);
                     console.log('✅ updateUserInfo completed')
                     ;
                     Alert.alert("成功", "個人資料已更新");
