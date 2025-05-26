@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('./db');
-const queries = require('./queries');
+const pool = require('../db');
+const queries = require('../queries');
 
 // 1. 取得商品/團購單（含搜尋/標籤/分頁）
 router.get('/orders', async (req, res) => {
