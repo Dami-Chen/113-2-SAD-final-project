@@ -85,6 +85,7 @@ router.get('/open_order', async (req, res) => {
 // 查詢使用者的所有訂單
 router.get('/history_order', async (req, res) => {
   const { username } = req.query;
+  console.log('Received username:', username);
   if (!username) {
     return res.status(400).json({ error: 'username' });
   }
@@ -146,7 +147,7 @@ router.get('/order_host', async (req, res) => {
     res.status(500).json({ error: '查詢失敗', detail: err.message });
   }
 });
-
+/*
 // 修改個人資訊
 router.post('/updateUserInfo', async (req, res) => {
   const {
@@ -172,7 +173,7 @@ router.post('/updateUserInfo', async (req, res) => {
     console.error("❌ updateUserInfo error:", err);
     res.status(500).json({ error: '更新失敗', detail: err.message });
   }
-});
+});*/
 
 
 
