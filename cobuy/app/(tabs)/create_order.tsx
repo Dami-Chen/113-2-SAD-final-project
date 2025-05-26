@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,67 +11,103 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
+
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth, OrderFormType } from '../../contexts/auth-context';  // Adjust path as needed
 import axios from 'axios';
+
+const initialFormState: OrderFormType = {
+  order_id: '',
+  host_username: '',
+  item_name: '',
+  quantity: '',
+  total_price: '',
+  unit_price: '',
+  imageUrl: '',
+  information: '',
+  share_method: '',
+  share_location: '',
+  stop_at_num: '',
+  stop_at_date: null,
+  comment: '',
+  hashtag: '',
+  paymentMethod: '',
+};
+
 
 export default function CreateOrder(){
   const [closingMethod, setClosingMethod] = useState<'quantity' | 'datetime'>('quantity');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [yearInput, setYearInput] = useState(String(new Date().getFullYear()));
+  const [monthInput, setMonthInput] = useState(String(new Date().getMonth() + 1));
+  const [dayInput, setDayInput] = useState(String(new Date().getDate()));
+  // const [date, setDate] = useState({ stop_at_date: null });
+
 
   const router = useRouter();
-  const { createOrder } = useAuth();
+  const { createOrder, username } = useAuth();
+  const [form, setForm] = useState<OrderFormType>(initialFormState);
+  const [loading, setLoading] = useState(false);
 
-  const [form, setForm] = useState<OrderFormType>({
-    order_id: '',
-    host_username: '',
-    item_name: '',
-    quantity: '',
-    total_price: '',
-    unit_price: '',
-    imageUrl: '',
-    information: '',
-    share_method: '',
-    share_location: '',
-    stop_at_num: '',
-    stop_at_date: '',
-    comment: '',
-    hashtag: '',
-    paymentMethod: ''
-  });
+
+
 
   const handleChange = (key: keyof OrderFormType, value: string) => {
     let newValue: any = value;
     if (key === 'quantity' || key === 'total_price' || key === 'unit_price' || key === 'stop_at_num') {
       // Convert numeric fields from string to number
-      newValue = value === '' ? 0 : Number(value);
+      newValue = value === '' || value === null ? null : Number(value);
     } else if (key === 'stop_at_date') {
       // Convert string to Date, assuming format 'YYYY-MM-DD'
-      newValue = value ? new Date(value) : new Date();
+      newValue = value === value || null;
     }
+
 
     setForm(prev => ({ ...prev, [key]: newValue }));
   };
-  const [loading, setLoading] = useState(false);
+
 
   const handleSubmit = async () => {
-  
+
     if (!form.item_name) {
       Alert.alert('錯誤', '請輸入團購物品名稱');
       return;
     }
     setLoading(true);
+    if(username)
+      form.host_username = username
+    // await createOrder(form);
+    // router.replace('/(tabs)/history_order'); // 註冊完導去登入
 
-    await createOrder(form);
-    router.replace('/(tabs)/history_order'); // 註冊完導去登入
+
+    try {
+      await createOrder(form);
+      Alert.alert('成功', '團購建立成功');
+
+
+      // Reset form and related states
+      setForm(initialFormState);
+      setYearInput(String(new Date().getFullYear()));
+      setMonthInput(String(new Date().getMonth() + 1));
+      setDayInput(String(new Date().getDate()));
+      setClosingMethod('quantity');
+
+
+      // Navigate to history_order page after clearing form
+      router.replace('/(tabs)/history_order');
+    } catch (err) {
+      Alert.alert('錯誤', '團購建立失敗');
+    } finally {
+      setLoading(false);
+    }
 
   };
 
-  
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
       <Text style={styles.title}>發起團購</Text>
+
 
       <TextInput
         placeholder="輸入團購物品名稱"
@@ -79,6 +115,7 @@ export default function CreateOrder(){
         value={form.item_name}
         onChangeText={text => handleChange('item_name', text)}
       />
+
 
       <View style={styles.row}>
         <TextInput
@@ -104,10 +141,12 @@ export default function CreateOrder(){
         />
       </View>
 
+
       <TouchableOpacity style={styles.uploadBox}>
         <Ionicons name="cloud-upload-outline" size={24} color="#666" />
         <Text style={{ color: '#666' }}> 上傳照片 </Text>
       </TouchableOpacity>
+
 
       <TextInput
         placeholder="輸入商品資訊"
@@ -117,6 +156,7 @@ export default function CreateOrder(){
         value={form.information}
         onChangeText={text => handleChange('information', text)}
       />
+
 
       <View style={styles.row}>
         <TextInput
@@ -133,6 +173,7 @@ export default function CreateOrder(){
         />
       </View>
 
+
       <Text style={{ marginBottom: 4, color: '#333' }}>結單方式</Text>
       <View style={styles.radioRow}>
         <TouchableOpacity
@@ -140,7 +181,7 @@ export default function CreateOrder(){
           onPress={() => {
             setClosingMethod('quantity');
             setShowDatePicker(false);
-            setForm(prev => ({ ...prev, stop_at_num: 0 }));
+            setForm(prev => ({ ...prev, stop_at_num: 0, stop_at_date: null }));
           }}
         >
           <View style={styles.radioCircle}>
@@ -149,12 +190,13 @@ export default function CreateOrder(){
           <Text style={styles.radioText}>數量達到上限</Text>
         </TouchableOpacity>
 
+
         <TouchableOpacity
           style={styles.radioOption}
           onPress={() => {
             setClosingMethod('datetime');
             setShowDatePicker(true);
-            setForm(prev => ({ ...prev, stop_at_num: 0 }));
+            setForm(prev => ({ ...prev, stop_at_date: null, stop_at_num: 0 }));
           }}
         >
           <View style={styles.radioCircle}>
@@ -164,17 +206,51 @@ export default function CreateOrder(){
         </TouchableOpacity>
       </View>
 
-      
+
 
     {closingMethod === 'quantity' && (
         <TextInput
           placeholder="設定人數上限"
           style={styles.input}
           keyboardType="numeric"
-          value={form.stop_at_num === 0 ? '' : form.stop_at_num.toString()}
+          value={form.stop_at_num ? form.stop_at_num.toString() : ''}
           onChangeText={text => handleChange('stop_at_num', text)}
         />
     )}
+    {closingMethod === 'datetime' && (
+      <View style={styles.dateInputRow}>
+        <TextInput
+          placeholder="年 (YYYY)"
+          style={styles.dateInput}
+          keyboardType="numeric"
+          value={yearInput}
+          onChangeText={text => {
+            setYearInput(text);
+            handleChange('stop_at_date', `${text}-${monthInput.padStart(2, '0')}-${dayInput.padStart(2, '0')}`);
+          }}
+        />
+        <TextInput
+          placeholder="月 (MM)"
+          style={styles.dateInput}
+          keyboardType="numeric"
+          value={monthInput}
+          onChangeText={text => {
+            setMonthInput(text);
+            handleChange('stop_at_date', `${yearInput}-${text.padStart(2, '0')}-${dayInput.padStart(2, '0')}`);
+          }}
+        />
+        <TextInput
+          placeholder="日 (DD)"
+          style={styles.dateInput}
+          keyboardType="numeric"
+          value={dayInput}
+          onChangeText={text => {
+            setDayInput(text);
+            handleChange('stop_at_date', `${yearInput}-${monthInput.padStart(2, '0')}-${text.padStart(2, '0')}`);
+          }}
+        />
+      </View>
+      )}
 
       <TextInput
         placeholder="備註欄"
@@ -189,15 +265,18 @@ export default function CreateOrder(){
         onChangeText={text => handleChange('paymentMethod', text)}
       />
 
+
       <TouchableOpacity
         style={styles.submitBtn}
-        onPress={handleSubmit}  
+        onPress={handleSubmit}
       >
         <Text style={{ color: '#fff', fontWeight: 'bold' }}>確認發起團購</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
+
+
 
 
 const styles = StyleSheet.create({
@@ -285,29 +364,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#fff', // 強制背景色
   },
+  dateInputRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8, // optional if using React Native >= 0.71
+  },
+  dateInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    marginRight: 8,
+    borderRadius: 4,
+    textAlign: 'center',
+  },
 });
-
-/*
-{showDatePicker && (
-      <View style={{ marginBottom: 12 }}>
-        <Text style={{ marginBottom: 4, color: '#333' }}>選擇截止時間</Text>
-        <DateTimePicker
-          value={selectedDate || new Date()}
-          mode="datetime"
-          display="default"
-          onChange={(event, date) => {
-            if (event.type === 'set' && date) {
-              setSelectedDate(date); // for display
-              setForm(prev => ({ ...prev, stop_at_date: date })); // actually set it only when confirmed
-            }
-          }}
-        />
-        {selectedDate && (
-        <Text style={{ color: '#666', marginTop: 8 }}>
-          已選擇截止時間：{selectedDate.toLocaleString()}
-        </Text>
-      )}
-      </View>
-      )}
-*/ 
-

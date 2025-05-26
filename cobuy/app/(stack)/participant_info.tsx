@@ -136,7 +136,7 @@ export default function ParticipantInfo() {
                   const payload = {
                     reporter_username: authUsername,
                     target_username: username,
-                    order_id: orderId,
+                    order_id: Number(orderId),
                     reason: cancelReason,
                     reported_at: new Date().toISOString(),
                     status: 'pending',

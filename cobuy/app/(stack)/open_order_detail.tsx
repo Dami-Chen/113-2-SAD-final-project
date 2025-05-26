@@ -9,7 +9,7 @@ import axios from 'axios';
 
 export default function OrderDetail() {
   const router = useRouter();
-  const { id } = useLocalSearchParams() as {id: string};
+  const { id } = useLocalSearchParams() as { id: string};
   const { username, openOrderDetail, getParticipantByOrder} = useAuth();
   const [order, setOrder] = useState<OrderFormType | null>(null);
   const [participants, setParticipants] = useState<JoinOrderType[]>([]);
@@ -27,7 +27,7 @@ export default function OrderDetail() {
       try {
         const orders = (await openOrderDetail(username!)) as unknown as OrderFormType[]; 
         console.log('🔍 openOrderDetail response', orders);
-        const foundOrder = orders.find(order => order.order_id === id);
+        const foundOrder = orders.find(order => String(order.order_id) === String(id));
         console.log('🔍 foundOrder', foundOrder);
         setOrder(foundOrder || null);
 
