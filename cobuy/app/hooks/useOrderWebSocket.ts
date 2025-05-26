@@ -5,7 +5,7 @@ export default function useOrderWebSocket(username: string) {
   useEffect(() => {
     if (!username) return;
 
-    const socket = new WebSocket('wss://你的後端網址'); // 換成你的 Railway 網域
+    const socket = new WebSocket('https://cobuy.up.railway.app'); // 換成你的 Railway 網域
 
     socket.onopen = () => {
       socket.send(JSON.stringify({ username }));

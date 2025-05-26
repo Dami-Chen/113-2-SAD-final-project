@@ -99,7 +99,7 @@ const _Layout = () => {
               color={focused ? '#B38F7D' : '#AAA'}
             />
           ),
-          title: '我我我'
+          title: username || '個人資訊',
         }}
       />
     </Tabs>
