@@ -426,7 +426,7 @@ export default function HomeScreen() {
     <View>
       <View style={styles.header}>
         <Text style={styles.logo}>西敗</Text>
-        <TouchableOpacity onPress={() => router.push('/profile')}>
+        <TouchableOpacity onPress={() => router.push('/profile/info')}>
           <Ionicons name="person-circle-outline" size={28} color="#B38F7D" />
         </TouchableOpacity>
       </View>

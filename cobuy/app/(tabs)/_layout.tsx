@@ -18,12 +18,12 @@ const _Layout = () => {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 16,
+          bottom: 0,
           left: 16,
           right: 16,
           height: 56,
           backgroundColor: '#FFF8F0',
-          borderRadius: 28,
+          borderRadius: 0,
           elevation: 5,
         },
       }}
