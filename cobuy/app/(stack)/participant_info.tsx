@@ -61,6 +61,15 @@ const ParticipantInfo = () => {
       </View>
 
       <TouchableOpacity
+              style={styles.okBtn}
+              onPress={() => {
+                router.push('/(tabs)/history_order?tab=open');
+              }}
+            >
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>拼單者已取貨</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         onPress={() => {
           Alert.alert(
             '確認標示為棄單',
@@ -149,8 +158,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#8c6a5d',
   },
-  cancelBox: {
+  okBtn: {
     marginTop: 60,
+    backgroundColor: '#c59b86',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelBox: {
+    marginTop: 20,
     backgroundColor: '#fdd',
     paddingVertical: 12,
     borderRadius: 12,

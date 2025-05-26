@@ -96,6 +96,17 @@ const JoinOrderDetail = () => {
           <Text style={styles.creditScore}>4</Text>
         </View>
       </View>
+      
+{/* 取貨按鈕可刪=============================================================== */}      
+      <TouchableOpacity
+        style={styles.okBtn}
+        onPress={() => {
+        router.push('/(tabs)/history_order?tab=open');
+        }}
+        >
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>拼單者已取貨</Text>
+      </TouchableOpacity>
+{/* 取貨按鈕可刪=============================================================== */}
 
       <TouchableOpacity
         onPress={() => {
@@ -206,8 +217,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#8c6a5d',
   },
+  //取貨按鈕可刪===============================================================
+  okBtn: {
+    marginTop: 60,
+    backgroundColor: '#c59b86',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
   cancelBox: {
-    marginTop: 30,
+    marginTop: 20,
     backgroundColor: '#fdd',
     paddingVertical: 12,
     borderRadius: 12,
