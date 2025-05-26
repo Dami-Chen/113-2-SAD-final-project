@@ -5,24 +5,23 @@ const queries = require('../sql/queries');
 const { sendOneSignalNotification } = require('../onesignal');
 const { notifyViaWebSocket } = require('../ws');
 
-
 // 開團
 router.post('/orders', async (req, res) => {
-  const { 
-    username, 
-    item_name, 
-    quantity, 
+  const {
+    username,
+    item_name,
+    quantity,
     total_price,
-    unit_price, 
-    image_url, 
-    information, 
+    unit_price,
+    image_url,
+    information,
     share_method,
     share_location,
-    stop_at_num, 
+    stop_at_num,
     stop_at_date,
-    comment, 
-    hashtag, 
-    pay_method 
+    comment,
+    hashtag,
+    pay_method
   } = req.body;
   try {
     const result = await pool.query('SELECT MAX(order_id) AS max_id FROM orders');
@@ -35,22 +34,23 @@ router.post('/orders', async (req, res) => {
     }
     const newOrderId = (maxId + 1).toString(); // convert back to string if needed
 
+
     await pool.query(queries.createOrder, [
       newOrderId,
-      username, 
-      item_name, 
-      quantity, 
+      username,
+      item_name,
+      quantity,
       total_price,
-      unit_price, 
-      image_url, 
-      information, 
+      unit_price,
+      image_url,
+      information,
       share_method,
       share_location,
-      stop_at_num, 
+      stop_at_num,
       stop_at_date,
-      comment, 
-      hashtag, 
-      pay_method 
+      comment,
+      hashtag,
+      pay_method
     ]);
     res.status(201).json({ message: '開團成功' });
   } catch (err) {
@@ -68,6 +68,7 @@ router.get('/orders', async (req, res) => {
   }
 });*/
 
+
 // 查詢單一訂單
 router.get('/open_order', async (req, res) => {
   const { username } = req.query;
@@ -82,6 +83,7 @@ router.get('/open_order', async (req, res) => {
   }
 });
 
+
 // 查詢使用者的所有訂單
 router.get('/history_order', async (req, res) => {
   const { username } = req.query;
@@ -91,16 +93,18 @@ router.get('/history_order', async (req, res) => {
   try {
     const hostResult = await pool.query(queries.getOrdersByUser, [username]);
     const joinResult = await pool.query(queries.getOrdersJoinedByUser, [username]);
-    
+   
     const hostOrders = hostResult.rows.map(order => ({
       ...order,
       order_type: 'host',
     }));
 
+
     const joinOrders = joinResult.rows.map(order => ({
       ...order,
       order_type: 'join',
     }));
+
 
     // 3. 合併後回傳
     const allOrders = [...hostOrders, ...joinOrders];
@@ -110,6 +114,7 @@ router.get('/history_order', async (req, res) => {
     res.status(500).json({ error: '查詢失敗', detail: err.message });
   }
 });
+
 
 // 查某使用者參與的所有拼單
 router.get('/joined_order/:id', async (req, res) => {
@@ -122,6 +127,7 @@ router.get('/joined_order/:id', async (req, res) => {
   }
 });
 
+
 // 查某訂單的所有參與者
 router.get('/orders/:id', async (req, res) => {
   const order_id = req.params.id;
@@ -132,6 +138,7 @@ router.get('/orders/:id', async (req, res) => {
     res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
   }
 });
+
 
 // 查某訂單的單主
 router.get('/order_host', async (req, res) => {
@@ -147,6 +154,7 @@ router.get('/order_host', async (req, res) => {
   }
 });
 
+
 // 修改個人資訊
 router.post('/updateUserInfo', async (req, res) => {
   const {
@@ -157,7 +165,7 @@ router.post('/updateUserInfo', async (req, res) => {
     student_id,
     dorm,
   } = req.body;
-  
+ 
   try {
     await pool.query(queries.updateUserProfile, [
       username,
@@ -174,28 +182,31 @@ router.post('/updateUserInfo', async (req, res) => {
   }
 });
 
-
-
 // 加入訂單
 router.post('/join', async (req, res) => {
   const { order_id, user_id, quantity } = req.body;
   try {
     await pool.query(queries.joinOrder, [user_id, order_id, quantity]);
 
+
     // 查目前參加人數
     const { rows } = await pool.query(queries.getParticipantsByOrder, [order_id]);
     const participants = rows.map(r => r.username);
+
 
     // 查訂單上限
     const orderResult = await pool.query(queries.getOrderById, [order_id]);
     const limit = orderResult.rows[0].stop_at_num;
 
+
     if (participants.length >= limit) {
       const msg = `你參與的拼單已額滿！`;
+
 
       notifyViaWebSocket(participants, { type: 'GROUP_FULL', order_id });
       await sendOneSignalNotification(participants, msg);
     }
+
 
     res.status(201).json({ message: '已成功加入訂單' });
   } catch (err) {
