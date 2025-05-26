@@ -49,7 +49,7 @@ export default function HomeScreen() {
     <View>
       <View style={styles.header}>
         <Text style={styles.logo}>西敗</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/profile')}>
           <Ionicons name="person-circle-outline" size={28} color="#B38F7D" />
         </TouchableOpacity>
       </View>
@@ -67,9 +67,20 @@ export default function HomeScreen() {
             onBlur={() => setIsSearchActive(false)}
             value={searchText}
             onChangeText={setSearchText}
-            onSubmitEditing={() => {
+            onSubmitEditing={async () => {
               if (searchText.trim()) {
-                setSearchRecords(prev => [searchText.trim(), ...prev].slice(0,3));
+                setSearchRecords(prev => [searchText.trim(), ...prev].slice(0, 3));
+
+                try {
+                  await fetch('https://your-backend-api-endpoint.com/api/search-records', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword: searchText.trim() }),
+                  });
+                } catch (error) {
+                  console.error('Failed to save search record', error);
+                }
+
                 setSearchText('');
                 setIsSearchActive(true);
                 setTimeout(() => scrollRef.current?.scrollTo({ y: searchWrapperY, animated: true }), 100);
@@ -259,7 +270,9 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     paddingHorizontal: 8,
-    fontSize: 14,
+    paddingVertical: 10,
+    fontSize: 16,
+    lineHeight: 22,
     color: '#333',
   },
   searchHistory: {

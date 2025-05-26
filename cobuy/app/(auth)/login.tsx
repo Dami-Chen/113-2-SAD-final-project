@@ -48,6 +48,7 @@ export default function Login() {
       <Pressable onPress={() => router.replace('/(auth)/register')} className="mt-6 items-center">
         <Text className="text-dark underline">沒有帳號？前往註冊</Text>
       </Pressable>
+
     </View>
   )
 }
