@@ -36,6 +36,22 @@ module.exports = {
   getOrdersByUser: `
     SELECT * FROM orders WHERE host_username = $1
   `,
+  getAllOrdersWithFilter: `
+    SELECT * FROM orders
+    WHERE
+      ($1::text IS NULL OR item_name ILIKE '%' || $1 || '%')
+      AND ($2::text IS NULL OR hashtag ILIKE '%' || $2 || '%')
+    ORDER BY order_id DESC
+    LIMIT $3 OFFSET $4
+  `,
+  getPopularTags: `
+    SELECT unnest(string_to_array(hashtag, ' ')) AS tag, COUNT(*) AS cnt
+    FROM orders
+    GROUP BY tag
+    ORDER BY cnt DESC
+    LIMIT 10
+  `,
+
 
   // ======== 留言 OrderComment ========
   createComment: `
