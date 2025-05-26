@@ -6,7 +6,9 @@ const server = http.createServer(app);
 const authRoutes = require('./routes/auth');
 const orderRoutes = require('./routes/orders');
 const userRoutes = require('./routes/users');
+const indexRoutes = require('./routes/index');
 const { initWebSocket } = require('./ws');
+
 require('dotenv').config();
 
 app.use(cors());
@@ -15,6 +17,7 @@ app.use(express.json());
 app.use('/api', authRoutes);
 app.use('/api', orderRoutes);
 app.use('/api', userRoutes);
+app.use('/api', indexRoutes);
 
 initWebSocket(server); // 初始化 WebSocket
 

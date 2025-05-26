@@ -12,18 +12,39 @@ import {
   Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth, OrderFormType, JoinOrderType, RegisterFormType } from '../../contexts/auth-context';  // Adjust path as needed
+
 
 export default function UserInfoScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
+  const { openUserInfo, username, getHostInfo, updateUserInfo} = useAuth();
+  const [userInfo, setUserInfo] = useState<RegisterFormType | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState<RegisterFormType>({
+    username: '',
+    password: '',
+    nickname: '',
+    real_name: '',
+    email: '',
+    school: '',
+    student_id: '',
+    dorm: '',
+    phone: '',
+    score: 0,
+    });
+
   const [avatarUri, setAvatarUri] = useState(null);
-  const [username, setUsername] = useState('');
+  // const [username, setUsername] = useState('');
   const [realName, setRealName] = useState('');
   const [email, setEmail] = useState('');
   const [school, setSchool] = useState('');
   const [studentId, setStudentId] = useState('');
   const [dorm, setDorm] = useState('');
 
+  
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -33,13 +54,29 @@ export default function UserInfoScreen() {
     });
 
     if (!result.canceled) {
-      setAvatarUri(result.assets[0].uri);
+      setAvatarUri(null); 
+      // result.assets[0].uri 
     }
   };
-
-  const handleUpdate = async () => {
+  const handleInputChange = (field: keyof RegisterFormType, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+  useEffect(() => {
+    const handleUpdate = async () => {
+    console.log('🔍 username', username);
     try {
-      const response = await fetch('https://your-api-url.com/api/updateProfile', {
+        if(username){
+            const user = await getHostInfo(username) as RegisterFormType;
+            console.log('🔍 getUserInfo response', user);
+            setUserInfo(user);
+            setForm(user);
+        }
+        
+    
+      /*const response = await fetch('https://your-api-url.com/api/updateProfile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -51,18 +88,25 @@ export default function UserInfoScreen() {
           dorm,
           avatar: avatarUri,
         }),
-      });
 
+      });
       const data = await response.json();
       if (response.ok) {
         Alert.alert('成功', '資料已更新');
       } else {
         Alert.alert('錯誤', data.message || '更新失敗');
-      }
-    } catch (error) {
-      Alert.alert('錯誤', '發生錯誤，請稍後再試');
+      }*/
+      
+    } catch (err: any) {
+        console.error('❌ Error loading order details:', err);
+        setError(err.message || '無法取得訂單詳情');
+    } finally {
+      setLoading(false);
     }
   };
+  handleUpdate();
+  }, [username])
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -85,33 +129,88 @@ export default function UserInfoScreen() {
           <TextInput
             style={styles.username}
             placeholder="用戶名"
-            value={username}
-            onChangeText={setUsername}
-          />
-          <Text style={styles.credits}>信用分數：？</Text>
+            value={form.username}
+            editable={false}
+            />
+          <Text style={styles.credits}>信用分數：{form.score}</Text>
         </View>
       </View>
 
       <View style={styles.form}>
         <Text style={styles.label}>真實姓名</Text>
-        <TextInput style={styles.input} placeholder="" value={realName} onChangeText={setRealName} />
+        <TextInput 
+            style={styles.input} 
+            placeholder="" 
+            value={form.real_name || ""}
+            editable={isEditing} 
+            onChangeText={(text) => handleInputChange('real_name', text)}
+            />
 
         <Text style={styles.label}>E-Mail</Text>
-        <TextInput style={styles.input} placeholder="" value={email} onChangeText={setEmail} />
+        <TextInput 
+            style={styles.input} 
+            placeholder="" 
+            value={form.email || ""}
+            editable={isEditing}
+            onChangeText={(text) => handleInputChange('email', text)} 
+        />
 
         <Text style={styles.label}>學校</Text>
-        <TextInput style={styles.input} placeholder="" value={school} onChangeText={setSchool} />
+        <TextInput     
+            style={styles.input} 
+            placeholder="" 
+            value={form.school || ""}
+            editable={isEditing}
+            onChangeText={(text) => handleInputChange('school', text)}  
+        />
 
         <Text style={styles.label}>學號</Text>
-        <TextInput style={styles.input} placeholder="" value={studentId} onChangeText={setStudentId} />
+        <TextInput     
+            style={styles.input} 
+            placeholder="" 
+            value={form.student_id|| ""}
+            editable={isEditing}
+            onChangeText={(text) => handleInputChange('student_id', text)}  
+        />
 
         <Text style={styles.label}>宿舍</Text>
-        <TextInput style={styles.input} placeholder="" value={dorm} onChangeText={setDorm} />
+        <TextInput     
+            style={styles.input} 
+            placeholder="" 
+            value={form.dorm || ""}
+            editable={isEditing}
+            onChangeText={(text) => handleInputChange('dorm', text)}  
+        />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-        <Text style={styles.buttonText}>修改</Text>
-      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={async () => {
+            if (isEditing) {
+                try {
+                    setLoading(true);
+                    // Simulate update API call
+                    console.log('🔄 Saving info:', form);
+                    
+                    await updateUserInfo(form);
+                    console.log('✅ updateUserInfo completed')
+                    ;
+                    Alert.alert("成功", "個人資料已更新");
+                    setIsEditing(false);
+                } catch (err) {
+                    console.error("❌ Failed to update user info:", err);
+                    Alert.alert("錯誤", "更新失敗，請稍後再試");
+                } finally {
+                    setLoading(false);
+                }
+            } else {
+            setIsEditing(true);
+            }
+        }}
+        >
+        <Text style={styles.buttonText}>{isEditing ? "儲存" : "修改"}</Text>
+    </TouchableOpacity>
+
     </ScrollView>
   );
 }
@@ -194,3 +293,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+/*
+<TouchableOpacity style={styles.button} onPress={handleUpdate}>
+        <Text style={styles.buttonText}>修改</Text>
+      </TouchableOpacity>
+*/

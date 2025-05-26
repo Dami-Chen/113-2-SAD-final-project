@@ -147,6 +147,33 @@ router.get('/order_host', async (req, res) => {
   }
 });
 
+// 修改個人資訊
+router.post('/updateUserInfo', async (req, res) => {
+  const {
+    username,
+    real_name,
+    email,
+    school,
+    student_id,
+    dorm,
+  } = req.body;
+  
+  try {
+    await pool.query(queries.updateUserProfile, [
+      username,
+      real_name,
+      email,
+      school,
+      student_id,
+      dorm,
+    ]);
+    res.json({ success: true, message: '更新成功' });
+  } catch (err) {
+    console.error("❌ updateUserInfo error:", err);
+    res.status(500).json({ error: '更新失敗', detail: err.message });
+  }
+});
+
 
 
 // 加入訂單

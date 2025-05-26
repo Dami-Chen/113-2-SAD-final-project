@@ -12,6 +12,17 @@ module.exports = {
     FROM users
     WHERE username = $1
   `,
+  updateUserProfile: `
+    UPDATE users
+    SET
+      real_name = $2,
+      email = $3,
+      school = $4,
+      student_id = $5,
+      dorm = $6
+    WHERE username = $1;
+  `,
+
   // title, description, creator_id, limit_count, deadline
   // ======== 開團 Orders ========
   createOrder: `
@@ -36,6 +47,22 @@ module.exports = {
   getOrdersByUser: `
     SELECT * FROM orders WHERE host_username = $1
   `,
+  getAllOrdersWithFilter: `
+    SELECT * FROM orders
+    WHERE
+      ($1::text IS NULL OR item_name ILIKE '%' || $1 || '%')
+      AND ($2::text IS NULL OR hashtag ILIKE '%' || $2 || '%')
+    ORDER BY order_id DESC
+    LIMIT $3 OFFSET $4
+  `,
+  getPopularTags: `
+    SELECT unnest(string_to_array(hashtag, ' ')) AS tag, COUNT(*) AS cnt
+    FROM orders
+    GROUP BY tag
+    ORDER BY cnt DESC
+    LIMIT 5
+  `,
+
 
   // ======== 留言 OrderComment ========
   createComment: `
