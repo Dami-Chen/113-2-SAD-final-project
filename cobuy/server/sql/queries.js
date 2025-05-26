@@ -60,7 +60,7 @@ module.exports = {
     FROM orders
     GROUP BY tag
     ORDER BY cnt DESC
-    LIMIT 10
+    LIMIT 5
   `,
 
 
