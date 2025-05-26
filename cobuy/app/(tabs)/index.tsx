@@ -340,7 +340,7 @@ async function fetchTags() {
   return res.json();
 }
 async function fetchOrders({ search, tag, page = 1, pageSize = 20 }) {
-  const url = new URL(`${apiUrl}/api/orders`);
+  const url = new URL(`${apiUrl}/api/ordersdetail`);
   if (search) url.searchParams.append('search', search);
   if (tag) url.searchParams.append('tag', tag);
   url.searchParams.append('page', page);
@@ -351,7 +351,7 @@ async function fetchOrders({ search, tag, page = 1, pageSize = 20 }) {
   return res.json();
 }
 async function fetchOrderDetail(orderId) {
-  const res = await fetch(`${apiUrl}/api/orders/${orderId}`);
+  const res = await fetch(`${apiUrl}/api/ordersdetail/${orderId}`);
   if (!res.ok) throw new Error('Failed to fetch detail');
   return res.json();
 }
@@ -413,7 +413,7 @@ export default function HomeScreen() {
     if (modalVisible && selectedProductId) {
       setDetailLoading(true);
       fetchOrderDetail(selectedProductId)
-        .then((data) => {
+      .then((data) => {
         console.log('Order Detail:', data); // 加這行
         setSelectedProductDetail(data);
       })
