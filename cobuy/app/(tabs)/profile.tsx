@@ -10,19 +10,7 @@ const Profile = () => {
 
     const [userInfo, setUserInfo] = useState({ username: '', avatar: '' });
 
-    useEffect(() => {
-      const fetchUserInfo = async () => {
-        try {
-          const response = await fetch('https://your-backend-url.com/api/user/info');
-          const data = await response.json();
-          setUserInfo(data);
-        } catch (error) {
-          console.error('Failed to fetch user info:', error);
-        }
-      };
-
-      fetchUserInfo();
-    }, []);
+    
 
     return (
       <View style={styles.container} className="flex-1 bg-primary items-center pt-12">
