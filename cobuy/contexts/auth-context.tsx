@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         total_price: form.total_price,
         unit_price: form.unit_price,
         imageUrl: form.imageUrl,
-        description: form.information,
+        information: form.information,
         share_method: form.share_method,
         share_location: form.share_location,
         stop_at_num: form.stop_at_num,
