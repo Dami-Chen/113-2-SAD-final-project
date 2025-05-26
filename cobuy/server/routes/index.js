@@ -4,7 +4,7 @@ const pool = require('../db');
 const queries = require('../sql/queries');
 
 // 1. 取得商品/團購單（含搜尋/標籤/分頁）
-router.get('/orders', async (req, res) => {
+router.get('/ordersdetail', async (req, res) => {
   const { search = null, tag = null, page = 1, pageSize = 20 } = req.query;
   const offset = (parseInt(page) - 1) * parseInt(pageSize);
   const result = await pool.query(
@@ -21,7 +21,7 @@ router.get('/tags', async (req, res) => {
 });
 
 // 3. 商品（團購單）詳細
-router.get('/orders/:id', async (req, res) => {
+router.get('/ordersdetail/:id', async (req, res) => {
   const result = await pool.query(queries.getOrderById, [req.params.id]);
   res.json(result.rows[0]);
 });
