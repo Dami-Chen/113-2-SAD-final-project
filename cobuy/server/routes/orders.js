@@ -87,6 +87,7 @@ router.get('/history_order', async (req, res) => {
   const { username } = req.query;
   if (!username) {
     return res.status(400).json({ error: 'username' });
+    console.error('❌ Missing username in /history_order request');
   }
   try {
     const hostResult = await pool.query(queries.getOrdersByUser, [username]);
