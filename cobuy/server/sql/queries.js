@@ -29,12 +29,13 @@ module.exports = {
     INSERT INTO orders (
       order_id, host_username, item_name, quantity, total_price,
       unit_price, image_url, information, share_method, share_location,
-      stop_at_num, stop_at_date, comment, hashtag, pay_method
+      stop_at_num, stop_at_date, comment, hashtag, pay_method, labels
     )
     VALUES (
       $1, $2, $3, $4, $5,
       $6, $7, $8, $9, $10,
-      $11, $12, $13, $14, $15
+      $11, $12, $13, $14, $15,
+      $16
     )
   `
 ,

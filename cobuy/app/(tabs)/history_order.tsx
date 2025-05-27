@@ -12,12 +12,13 @@ import axios from 'axios';
 
 export default function HistoryOrder(){
   const router = useRouter();
-  const { historyOrder, username} = useAuth();
+  const { historyOrder, username, getParticipantByOrder} = useAuth();
   const { tab } = useLocalSearchParams();
   const initialTab = tab === 'join' ? 'join' : 'open';
   const [activeTab, setActiveTab] = useState<'open' | 'join'>(initialTab);
   const [openOrders, setOpenOrders] = useState<OrderFormType[]>([]);
   const [joinOrders, setJoinOrders] = useState<OrderFormType[]>([]);
+  const [joinedCounts, setJoinedCounts] = useState<{ [key: string]: number }>({});  
   const [loading, setLoading] = useState<boolean>(false);
   
 
@@ -39,22 +40,55 @@ export default function HistoryOrder(){
   loadHistory();
   }, [username]);
 
+  useEffect(() => {
+    const orders = activeTab === 'open' ? openOrders : joinOrders;
 
-  const renderOrderCard = (order: OrderFormType, isJoin = false) => (
+    const fetchJoinedCounts = async () => {
+      const newCounts: { [key: string]: number } = {};
+
+      await Promise.all(
+        orders.map(async (order) => {
+          try {
+            const participants = await getParticipantByOrder(order.order_id) as unknown as JoinOrderType[];
+            const totalJoined = participants.reduce(
+              (acc: number, cur: { quantity: number }) => acc + Number(cur.quantity),
+              0
+            );
+            newCounts[order.order_id] = totalJoined;
+          } catch (err) {
+            console.error(`取得參與者失敗：${order.order_id}`, err);
+            newCounts[order.order_id] = 0;
+          }
+        })
+      );
+
+      setJoinedCounts(newCounts);
+    };
+
+    if ((activeTab === 'open' && openOrders.length > 0) || (activeTab === 'join' && joinOrders.length > 0)) {
+      fetchJoinedCounts();
+    }
+  }, [activeTab, openOrders, joinOrders]);
+
+  
+  const renderOrderCard = (order: OrderFormType, isJoin = false) => {
+    const totalJoined = joinedCounts[order.order_id] || 0;
+    return(
     <TouchableOpacity
       key={order.order_id}
       style={styles.card}
       onPress={() =>
         router.push(`/(stack)/${isJoin ? 'join_order_detail' : 'open_order_detail'}?id=${order.order_id}`)
       }
+
     >
       <View style={styles.cardTextArea}>
         <Text style={styles.cardTitle}>{order.item_name}</Text>
-        <Text style={styles.cardSub}>目前拼單數量：{order.quantity}/{order.stop_at_num}</Text>
+        <Text style={styles.cardSub}>目前拼單數量：{totalJoined}/{order.quantity}</Text>
         <Text style={styles.cardSub}>結單方式：{order.stop_at_num}</Text>
         <View style={styles.progressBar} >
          <View style={[styles.progressFill, {
-            width: `${Math.min(Number(order.quantity) / Number(order.stop_at_num), 1) * 100}%`,
+            width: `${Math.min(Number(totalJoined) / Number(order.quantity), 1) * 100}%`,
           }]} />
          </View>
       
@@ -67,6 +101,7 @@ export default function HistoryOrder(){
       </View>
     </TouchableOpacity>
   );
+};
 
   return (
     <View style={styles.container}>

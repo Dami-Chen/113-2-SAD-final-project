@@ -50,6 +50,7 @@ export interface OrderFormType{
   comment: string;
   hashtag: string;
   paymentMethod: string;
+  labels: string|null;
 }
 
 export interface JoinOrderType {
@@ -126,15 +127,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         quantity: form.quantity,
         total_price: form.total_price,
         unit_price: form.unit_price,
-        imageUrl: form.imageUrl,
-        description: form.information,
+        image_url: form.imageUrl,
+        information: form.information,
         share_method: form.share_method,
         share_location: form.share_location,
         stop_at_num: form.stop_at_num,
         stop_at_date: form.stop_at_date,
-        comment: null,
-        hashtag: null,
-        pay_method: form.paymentMethod
+        // stop_at_num:  5, // 確保有值
+        // stop_at_date: null,
+        comment: form.comment,
+        hashtag: form.hashtag,
+        pay_method: form.paymentMethod,
+        labels: form.labels,
       });
       alert('成功，團購已發起');
     } catch (err: any) {
