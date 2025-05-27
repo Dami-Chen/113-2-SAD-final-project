@@ -3,6 +3,7 @@ import axios from 'axios';
 import { OneSignal } from 'react-native-onesignal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 interface AuthContextType {
   isLoggedIn: boolean | null; // ⬅️ 改為 boolean | null
   isAuthReady: boolean;
@@ -29,6 +30,7 @@ interface AuthContextType {
   }) => Promise<void>;
 }
 
+
 export interface RegisterFormType {
   username: string;
   password: string;
@@ -42,8 +44,9 @@ export interface RegisterFormType {
   score: number;
 }
 
+
 export interface OrderFormType{
-  order_id: string; 
+  order_id: string;
   host_username: string;
   item_name: string;
   quantity: number|string;
@@ -54,11 +57,13 @@ export interface OrderFormType{
   share_method: string;
   share_location: string;
   stop_at_num: number|string;
-  stop_at_date: Date|string;
+  stop_at_date: string|null;
   comment: string;
   hashtag: string;
   paymentMethod: string;
+  labels: string;
 }
+
 
 export interface JoinOrderType {
   username: string;
@@ -69,13 +74,20 @@ export interface JoinOrderType {
   phone: string;
 }
 
+
+
+
+
+
 const AuthContext = createContext<AuthContextType | null>(null);
 const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // ⬅️ 初始為 null
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -92,12 +104,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     restoreSession();
   }, []);
 
+
   const login = async (username: string, password: string) => {
     try {
       await axios.post(`${apiUrl}/api/login`, { username, password });
 
+
       setIsLoggedIn(true);
       setUsername(username);
+
 
       await AsyncStorage.setItem('username', username);
       OneSignal.login(username);
@@ -108,6 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAuthReady(true);
     }
   };
+
 
   const register = async (form: RegisterFormType) => {
     try {
@@ -124,23 +140,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+
   const createOrder = async (form: OrderFormType) => {
+    console.log('📌 createOrder form:', form);
     try {
       await axios.post(`${apiUrl}/api/orders`, {
-        username,  // host_username
+        username: form.host_username,  // host_username
         item_name: form.item_name,
         quantity: form.quantity,
         total_price: form.total_price,
         unit_price: form.unit_price,
-        imageUrl: form.imageUrl,
+        image_Url: form.imageUrl,
         information: form.information,
         share_method: form.share_method,
         share_location: form.share_location,
         stop_at_num: form.stop_at_num,
         stop_at_date: form.stop_at_date,
-        comment: null,
-        hashtag: null,
-        pay_method: form.paymentMethod
+        // stop_at_num:  5, // 確保有值
+        // stop_at_date: null,
+        comment: form.comment,
+        hashtag: form.hashtag,
+        pay_method: form.paymentMethod,
+        labels: form.labels,
       });
       alert('成功，團購已發起');
     } catch (err: any) {
@@ -148,6 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       alert(err.response?.data?.error || '發起團購失敗');
     }
   };
+
 
   const historyOrder = async (username: string | null) => {
     console.log('📌 username from query:', username);
@@ -158,9 +180,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const allOrders = res.data;
       // console.log("✅ historyOrder API response:", res.data);  // Check if it's an array or object
 
+
       const openOrders = allOrders.filter((o: any) => o.order_type === 'host');
       const joinOrders = allOrders.filter((o: any) => o.order_type === 'join');
       // console.log("✅ Open Orders:", openOrders);
+      // console.log("✅ Join Orders:", joinOrders);
       return { openOrders, joinOrders };
       alert('成功查詢歷史團購');
     } catch (err: any) {
@@ -169,6 +193,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(err.response?.data?.error || '查詢失敗');
     }
   };
+
 
   const openOrderDetail = async (username: string) => {
     try{
@@ -183,7 +208,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(err.response?.data?.error || '查詢開團資料失敗');
     }
 
+
   }
+
 
   const openJoinDetail = async (order_id: string) => {
     try{
@@ -192,11 +219,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("✅ joinedOrder API response:", res.data);
       return res.data;
 
+
     } catch (err: any) {
       console.log("❌ fetch joined order error:", err);
       throw new Error(err.response?.data?.error || '查詢拼單資訊失敗');
     }
   }
+
 
   const getHostInfo = async (username: string) => {
     try{
@@ -206,11 +235,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("✅ getHostInfo API response:", res.data);
       return res.data;
 
+
     }catch (err: any) {
       console.log("❌ fetch Host Info error:", err);
       throw new Error(err.response?.data?.error || '查詢主揪資訊失敗');
     }
-  
+ 
   }
   const getParticipantByOrder = async (order_id: string) => {
     try{
@@ -223,6 +253,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+
   /// 個人資訊頁面
   const openUserInfo = async (username: string) => {
     try{
@@ -232,12 +263,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("✅ participantByOrder API response:", res.data);
       return res.data;
 
+
     }
     catch (err: any) {
       console.log("❌ fetch participant by order error:", err);
       throw new Error(err.response?.data?.error || '查詢團購拼單者失敗');
     }
   }
+
 
   // 更新個人資訊
   const updateUserInfo = async (form: RegisterFormType) => {
@@ -251,28 +284,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         dorm: form.dorm,
       });      
 
+
     } catch (err: any) {
       console.log("❌ update user info error:", err);
       throw new Error(err.response?.data?.error || '更改個人資訊失敗');
 
+
     }
   }
 
-  //棄單
-  const reportAbandon = async (payload: {
-    reporter_username: string;
-    target_username: string;
-    order_id: number;
-    reason: string;
-    reported_at: string;
-    status: string;
-  }) => {
-    try {
-      await axios.post(`${apiUrl}/api/abandonReport`, payload);
-    } catch (err: any) {
-      throw new Error(err.message || '送出棄單報告失敗');
-    }  
-  }
+
+ 
+
 
   const logout = async () => {
     setIsLoggedIn(false);
@@ -282,17 +305,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsAuthReady(true);
   };
 
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register, 
-    createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo, 
-    openUserInfo, updateUserInfo, reportAbandon}}>
+    <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register,
+    createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo,
+    openUserInfo, updateUserInfo}}>
       {children}
     </AuthContext.Provider>
   );
 };
+
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used inside an AuthProvider');
   return context;
 };
+
+
+
