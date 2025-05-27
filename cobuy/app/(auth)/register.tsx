@@ -20,6 +20,8 @@ export default function Register() {
     score: 5,
   });
 
+  const [agree, setAgree] = useState(false);
+
   const handleChange = (key: keyof RegisterFormType, value: string) => {
     setForm(prev => ({ ...prev, [key]: value }));
   };
@@ -29,6 +31,11 @@ export default function Register() {
 
     if (!username || !password || !real_name || !email || !school || !student_id || !dorm) {
       Alert.alert('請填寫必填欄位');
+      return;
+    }
+
+    if (!agree) {
+      Alert.alert('請閱讀並同意用戶條款');
       return;
     }
 
@@ -115,7 +122,33 @@ export default function Register() {
           className="bg-block rounded-lg py-3 px-4 text-base text-dark mb-6"
         />
 
-        <Pressable onPress={handleRegister} className="bg-secondary py-3 rounded-lg items-center shadow">
+        {/* 條款同意區 */}
+        <View className="flex-row items-center mb-6">
+          <Pressable
+            onPress={() => setAgree(!agree)}
+            className={`w-5 h-5 border-2 mr-2 rounded items-center justify-center ${
+              agree ? 'bg-secondary border-secondary' : 'border-dark bg-white'
+            }`}
+          >
+            {agree && <Text className="text-white text-xs">✓</Text>}
+          </Pressable>
+          <Text className="text-dark text-sm">
+            我已閱讀並同意
+            <Text
+              className="text-blue-600 underline"
+              onPress={() => router.push('/(auth)/terms')} 
+            >
+              《用戶使用同意條款暨免責聲明》
+            </Text>
+          </Text>
+        </View>
+
+        {/* 註冊按鈕變成灰色（未勾選時） */}
+        <Pressable
+          onPress={handleRegister}
+          disabled={!agree}
+          className={`py-3 rounded-lg items-center shadow ${agree ? 'bg-secondary' : 'bg-gray-400'}`}
+        >
           <Text className="text-primary text-lg font-bold">註冊</Text>
         </Pressable>
 
