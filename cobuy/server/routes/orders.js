@@ -239,8 +239,8 @@ router.post('/abandonReport', async (req, res) => {
 
     res.status(200).json({ message: '報告成功送出', data: result.rows[0] });
   } catch (error) {
-    console.error('❌ 棄單報告失敗:', error); // ← 印出詳細錯誤訊息
-    res.status(500).json({ error: '伺服器錯誤' });
+      console.error('❌ 棄單報告失敗:', error.stack); // 印出堆疊，看到是哪裡錯
+      res.status(500).json({ error: '伺服器錯誤：' + error.message });
   }
 });
 

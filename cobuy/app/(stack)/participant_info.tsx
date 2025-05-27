@@ -149,7 +149,15 @@ export default function ParticipantInfo() {
                       router.replace(`/(stack)/open_order_detail?id=${orderId}`);
                     })
                     .catch((error) => {
-                      Alert.alert('提交失敗', error.message || '無法送出報告');
+                      // 印出更詳細的錯誤資訊
+                      console.log('❌ 提交失敗詳細訊息:', error);
+
+                      const serverMessage =
+                        error?.response?.data?.error || // 後端回傳的 JSON 格式錯誤訊息
+                        error?.message ||               // axios 的錯誤訊息
+                        '無法送出報告';
+
+                      Alert.alert('提交失敗', serverMessage);
                     });
                 } else {
                   Alert.alert('請填寫原因');
