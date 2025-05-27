@@ -87,7 +87,7 @@ export default function JoinOrderDetail() {
       </View>
 
       <Text style={styles.label}>結單方式</Text>
-      <Text style={styles.value}>{order?.stop_at_num !== null ? `滿 ${order?.stop_at_num} 人` : '未設定'}</Text>
+      <Text style={styles.value}>{order?.stop_at_num !== null ? `滿 ${order?.quantity} 個` : '未設定'}</Text>
 
 
       <View style={styles.progressWrapper}></View>

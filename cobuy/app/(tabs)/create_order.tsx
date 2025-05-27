@@ -12,11 +12,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 
+
+
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth, OrderFormType } from '../../contexts/auth-context';  // Adjust path as needed
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { Image, Modal } from 'react-native';
+
+
+
 
 const initialFormState: OrderFormType = {
   order_id: '',
@@ -34,8 +39,10 @@ const initialFormState: OrderFormType = {
   comment: '',
   hashtag: '',
   paymentMethod: '',
-  labels: '',
+  labels:'',
 };
+
+
 
 
 export default function CreateOrder(){
@@ -48,12 +55,20 @@ export default function CreateOrder(){
   // const [date, setDate] = useState({ stop_at_date: null });
 
 
+
+
   const router = useRouter();
   const { createOrder, username } = useAuth();
   const [form, setForm] = useState<OrderFormType>(initialFormState);
   const [loading, setLoading] = useState(false);
 
+
+
+
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+
+
 
   const pickImage = async () => {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -62,16 +77,21 @@ export default function CreateOrder(){
         aspect: [1, 1],
         quality: 1,
       });
-  
+
       if (!result.canceled && result.assets.length > 0) {
         setAvatarUri(result.assets[0].uri); // 記得設 uri
       }
   };
-
   const [category, setCategory] = useState('');
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [hashtagInput, setHashtagInput] = useState('');
   const [hashtags, setHashtags] = useState<string[]>([]);
+
+
+
+
+
+
 
 
   const handleChange = (key: keyof OrderFormType, value: string) => {
@@ -81,12 +101,16 @@ export default function CreateOrder(){
       newValue = value === '' || value === null ? null : Number(value);
     } else if (key === 'stop_at_date') {
       // Convert string to Date, assuming format 'YYYY-MM-DD'
-      newValue = value === value || null;
+      newValue = value === '' ? null : new Date(value);
     }
+
+
 
 
     setForm(prev => ({ ...prev, [key]: newValue }));
   };
+
+
 
 
   const handleSubmit = async () => {
@@ -102,9 +126,15 @@ export default function CreateOrder(){
     // router.replace('/(tabs)/history_order'); // 註冊完導去登入
 
 
+
+
     try {
+      form.imageUrl = `../../assets/images/${form.item_name}.png`;
+      console.log('📌 createOrder form:', form);
       await createOrder(form);
       Alert.alert('成功', '團購建立成功');
+
+
 
 
       // Reset form and related states
@@ -116,7 +146,14 @@ export default function CreateOrder(){
       setAvatarUri(null);
       setCategory('');
       setHashtagInput('');
-      setHashtags([]); 
+      setHashtags([]);
+
+
+
+
+
+
+
 
 
       // Navigate to history_order page after clearing form
@@ -127,43 +164,57 @@ export default function CreateOrder(){
       setLoading(false);
     }
 
+
+
+
+
+
+
+
   };
+
+
+
+
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
 
-
       <TextInput
-        placeholder="* 輸入團購物品名稱"
+        placeholder="輸入團購物品名稱"
         style={styles.input}
         value={form.item_name}
         onChangeText={text => handleChange('item_name', text)}
       />
 
 
+
+
       <View style={styles.row}>
         <TextInput
-          placeholder="* 物品數量"
+          placeholder="物品數量"
           style={[styles.input, styles.flex1]}
           keyboardType="numeric"
           value={form.quantity.toString()}
           onChangeText={text => handleChange('quantity', text)}
         />
         <TextInput
-          placeholder="* 物品總價"
+          placeholder="物品總價"
           style={[styles.input, styles.flex1]}
           keyboardType="numeric"
           value={form.total_price.toString()}
           onChangeText={text => handleChange('total_price', text)}
         />
         <TextInput
-          placeholder="* 團購單價"
+          placeholder="團購單價"
           style={[styles.input, styles.flex1]}
           keyboardType="numeric"
           value={form.unit_price.toString()}
           onChangeText={text => handleChange('unit_price', text)}
         />
       </View>
+
+
 
 
       <TouchableOpacity style={styles.uploadBox} onPress={pickImage}>
@@ -178,6 +229,8 @@ export default function CreateOrder(){
       </TouchableOpacity>
 
 
+
+
       <TextInput
         placeholder="輸入商品資訊"
         style={[styles.input, { height: 40 }]}
@@ -187,15 +240,21 @@ export default function CreateOrder(){
         onChangeText={text => handleChange('information', text)}
       />
 
+
+
+
       <Text style={{ marginBottom: 4, color: '#333' }}>商品類別</Text>
       <TouchableOpacity
         style={[styles.input, { justifyContent: 'center' }]}
         onPress={() => setShowCategoryModal(true)}
       >
         <Text style={{ color: category ? '#000' : '#999' }}>
-          {category || '* 請選擇商品類別'}
+          {category || '請選擇商品類別'}
         </Text>
       </TouchableOpacity>
+
+
+
 
       <Text style={{ marginBottom: 4, color: '#333' }}>Hashtag 標籤</Text>
       <View style={styles.row}>
@@ -208,16 +267,21 @@ export default function CreateOrder(){
         <TouchableOpacity
           style={[styles.addButton]}
           onPress={() => {
-            const trimmed = hashtagInput.trim();
-            if (trimmed && !hashtags.includes(trimmed)) {
-              setHashtags([...hashtags, trimmed]);
-            }
-            setHashtagInput('');
-          }}
+          const trimmed = hashtagInput.trim();
+          if (trimmed && !hashtags.includes(trimmed)) {
+            const newHashtags = [...hashtags, trimmed];
+            setHashtags(newHashtags);
+            setForm(prev => ({ ...prev, hashtag: newHashtags.join(',') }));
+          }
+          setHashtagInput('');
+        }}
         >
           <Text style={{ color: '#fff', fontWeight: 'bold' }}>加入</Text>
         </TouchableOpacity>
       </View>
+
+
+
 
       <View style={styles.hashtagContainer}>
         {hashtags.map((tag, index) => (
@@ -225,24 +289,28 @@ export default function CreateOrder(){
             key={index}
             style={styles.hashtagBadge}
             onPress={() => {
-              // 點擊標籤可移除
-              setHashtags(hashtags.filter((_, i) => i !== index));
-            }}
+            const newHashtags = hashtags.filter((_, i) => i !== index);
+            setHashtags(newHashtags);
+            setForm(prev => ({ ...prev, hashtag: newHashtags.join(',') }));
+          }}
           >
             <Text style={styles.hashtagText}>#{tag}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
+
+
+
       <View style={styles.row}>
         <TextInput
-          placeholder="* 分裝方式 e.g. 單包裝"
+          placeholder="分送方式 e.g. 單包裝"
           style={[styles.input, styles.flex1]}
           value={form.share_method}
           onChangeText={text => handleChange('share_method', text)}
         />
         <TextInput
-          placeholder="* 分送地點"
+          placeholder="分送地點"
           style={[styles.input, styles.flex1]}
           value={form.share_location}
           onChangeText={text => handleChange('share_location', text)}
@@ -250,7 +318,9 @@ export default function CreateOrder(){
       </View>
 
 
-      <Text style={{ marginBottom: 4, color: '#333' }}>* 結單方式</Text>
+
+
+      <Text style={{ marginBottom: 4, color: '#333' }}>結單方式</Text>
       <View style={styles.radioRow}>
         <TouchableOpacity
           style={styles.radioOption}
@@ -265,6 +335,8 @@ export default function CreateOrder(){
           </View>
           <Text style={styles.radioText}>數量達到上限</Text>
         </TouchableOpacity>
+
+
 
 
         <TouchableOpacity
@@ -284,9 +356,11 @@ export default function CreateOrder(){
 
 
 
+
+
     {closingMethod === 'quantity' && (
         <TextInput
-          placeholder="設定數量上限"
+          placeholder="設定人數上限"
           style={styles.input}
           keyboardType="numeric"
           value={form.stop_at_num ? form.stop_at_num.toString() : ''}
@@ -328,6 +402,14 @@ export default function CreateOrder(){
       </View>
       )}
 
+
+
+
+
+
+
+
+
       <TextInput
         placeholder="備註欄"
         style={styles.input}
@@ -335,11 +417,13 @@ export default function CreateOrder(){
         onChangeText={text => handleChange('comment', text)}
       />
       <TextInput
-        placeholder="* 可接受支付方式（例如：現金）"
+        placeholder="支付方式（例如：現金）"
         style={styles.input}
         value={form.paymentMethod}
         onChangeText={text => handleChange('paymentMethod', text)}
       />
+
+
 
 
       <TouchableOpacity
@@ -349,6 +433,9 @@ export default function CreateOrder(){
         <Text style={{ color: '#fff', fontWeight: 'bold' }}>確認發起團購</Text>
       </TouchableOpacity>
 
+
+
+
       <Modal visible={showCategoryModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -357,6 +444,7 @@ export default function CreateOrder(){
                 key={option}
                 onPress={() => {
                   setCategory(option);
+                  setForm(prev => ({ ...prev, labels: option }));
                   setShowCategoryModal(false);
                 }}
                 style={styles.modalOption}
@@ -373,6 +461,10 @@ export default function CreateOrder(){
     </ScrollView>
   );
 };
+
+
+
+
 
 
 
@@ -540,3 +632,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
