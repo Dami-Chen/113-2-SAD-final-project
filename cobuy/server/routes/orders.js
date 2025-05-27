@@ -225,16 +225,22 @@ router.post('/abandonReport', async (req, res) => {
     status
   } = req.body;
 
+  console.log('📥 棄單 API 收到的 payload:', req.body); // ← 加這個印出 payload
+
   try {
-    const result = await db.query(
-      insertAbandonReport,
-      [reporter_username, target_username, order_id, reason, reported_at, status]
-    );
+    const result = await db.query(insertAbandonReport, [
+    reporter_username,
+    target_username,
+    order_id,
+    reason,
+    reported_at,
+    status
+    ]);
 
     res.status(200).json({ message: '報告成功送出', data: result.rows[0] });
   } catch (error) {
-    console.error('❌ 棄單報告失敗:', error);
-    res.status(500).json({ error: '伺服器內部錯誤，無法送出棄單報告' });
+    console.error('❌ 棄單報告失敗:', error); // ← 印出詳細錯誤訊息
+    res.status(500).json({ error: '伺服器錯誤' });
   }
 });
 
