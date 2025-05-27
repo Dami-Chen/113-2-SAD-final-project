@@ -9,8 +9,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth, OrderFormType, JoinOrderType } from '../../contexts/auth-context';  // Adjust path as needed
 import axios from 'axios';
-
-
+import * as ImagePicker from 'expo-image-picker';
 export default function HistoryOrder(){
   const router = useRouter();
   const { historyOrder, username, getParticipantByOrder} = useAuth();
@@ -19,9 +18,24 @@ export default function HistoryOrder(){
   const [activeTab, setActiveTab] = useState<'open' | 'join'>(initialTab);
   const [openOrders, setOpenOrders] = useState<OrderFormType[]>([]);
   const [joinOrders, setJoinOrders] = useState<OrderFormType[]>([]);
-  const [joinedCounts, setJoinedCounts] = useState<{ [key: string]: number }>({});  
+  const [joinedCounts, setJoinedCounts] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState<boolean>(false);
- 
+  const [avatarUri, setAvatarUri] = useState(null);
+
+
+  const pickImage = async () => {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setAvatarUri(null);
+        // result.assets[0].uri
+      }
+    };
 
 
   useEffect(() => {
@@ -79,7 +93,7 @@ export default function HistoryOrder(){
   }, [activeTab, openOrders, joinOrders]);
 
 
- 
+
   const renderOrderCard = (order: OrderFormType, isJoin = false) => {
     const totalJoined = joinedCounts[order.order_id] || 0;
     return(
@@ -95,20 +109,29 @@ export default function HistoryOrder(){
       <View style={styles.cardTextArea}>
         <Text style={styles.cardTitle}>{order.item_name}</Text>
         <Text style={styles.cardSub}>目前拼單數量：{totalJoined}/{order.quantity}</Text>
-        <Text style={styles.cardSub}>結單方式：{order.stop_at_num}</Text>
+        <Text style={styles.cardSub}>
+        結單方式：
+        {typeof order.stop_at_num === 'number' && order.stop_at_num !== 0
+          ? `滿 ${order.quantity} 個`
+          : typeof order.stop_at_date === 'string'
+            ?  `${new Date(order.stop_at_date).toISOString().split('T')[0]}前`
+            : '未設定'}
+      </Text>
+
+
+
+
+
+
         <View style={styles.progressBar} >
          <View style={[styles.progressFill, {
             width: `${Math.min(Number(totalJoined) / Number(order.quantity), 1) * 100}%`,
           }]} />
          </View>
-     
-     
+
+
       </View>
-      <View style={styles.cardImageArea}>
-        <View style={styles.imageBox}>
-          {/* 可放圖片 */}
-        </View>
-      </View>
+
     </TouchableOpacity>
   );
 };
@@ -130,7 +153,7 @@ export default function HistoryOrder(){
       </View>
 
 
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         {(activeTab === 'open' ? openOrders : joinOrders).map(order =>
           renderOrderCard(order, activeTab === 'join')
         )}
@@ -141,7 +164,7 @@ export default function HistoryOrder(){
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40, },
+  container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40 },
   tabs: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -189,13 +212,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#c59b86',
     borderRadius: 999,
   },
+  noImageText: {
+  textAlign: 'center',
+  color: '#888',
+  fontSize: 14,
+  padding: 10,
+},
+ avatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 70,
+    resizeMode: 'cover',
+  },
 });
-
-
-
-
-
-
 
 
 
