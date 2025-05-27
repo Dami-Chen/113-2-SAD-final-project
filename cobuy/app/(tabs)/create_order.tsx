@@ -29,7 +29,7 @@ const initialFormState: OrderFormType = {
   share_method: '',
   share_location: '',
   stop_at_num: '',
-  stop_at_date: null,
+  stop_at_date: '',
   comment: '',
   hashtag: '',
   paymentMethod: '',
@@ -82,7 +82,7 @@ export default function CreateOrder(){
 
     setForm(prev => ({ ...prev, [key]: newValue }));
   };
-  const [loading, setLoading] = useState(false);
+  //const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
   
