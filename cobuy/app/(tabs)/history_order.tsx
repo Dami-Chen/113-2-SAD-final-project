@@ -130,7 +130,7 @@ export default function HistoryOrder(){
       </View>
 
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
         {(activeTab === 'open' ? openOrders : joinOrders).map(order =>
           renderOrderCard(order, activeTab === 'join')
         )}
@@ -141,7 +141,7 @@ export default function HistoryOrder(){
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40 },
+  container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40, },
   tabs: {
     flexDirection: 'row',
     paddingHorizontal: 16,
