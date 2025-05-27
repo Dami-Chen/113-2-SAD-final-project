@@ -52,7 +52,7 @@ router.post('/orders', async (req, res) => {
       comment,
       hashtag,
       pay_method,
-      label
+      labels
     ]);
     res.status(201).json({ message: '開團成功' });
   } catch (err) {

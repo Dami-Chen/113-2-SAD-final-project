@@ -141,7 +141,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         stop_at_date: form.stop_at_date,
         comment: null,
         hashtag: null,
-        pay_method: form.paymentMethod
+        pay_method: form.paymentMethod,
+        labels: null
       });
       alert('成功，團購已發起');
     } catch (err: any) {
