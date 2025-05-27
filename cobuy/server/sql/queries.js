@@ -8,7 +8,7 @@ module.exports = {
     SELECT * FROM users WHERE username = $1 AND password = $2
   `,
   getUserProfile: `
-    SELECT username, nickname, real_name, email, dorm, score, phone
+    SELECT username, nickname, real_name, email, dorm, score, phone, school, student_id
     FROM users
     WHERE username = $1
   `,
