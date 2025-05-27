@@ -16,7 +16,7 @@ export default function JoinOrderDetail() {
   const [error, setError] = useState<string | null>(null);
   const [progressRatio, setProgressRatio] = useState<number>(0)
 
-  
+
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -27,7 +27,7 @@ export default function JoinOrderDetail() {
       }
       setLoading(true);
       try {
-        const order = (await openJoinDetail(id!)) as unknown as OrderFormType[]; 
+        const order = (await openJoinDetail(id!)) as unknown as OrderFormType[];
         console.log('🔍 openJoinDetail response', order);
         setOrder(order[0] || null);
         console.log('🔍 getHostInfo response', order[0].host_username)
@@ -36,7 +36,7 @@ export default function JoinOrderDetail() {
             console.log('🔍 getHostInfo response', host);
             setHostInfo(host || null);
           }
-    
+
         } catch (err: any) {
         console.error('❌ Error loading order details:', err);
         setError(err.message || '無法取得訂單詳情');
@@ -85,10 +85,10 @@ export default function JoinOrderDetail() {
 
       <Text style={styles.label}>結單方式</Text>
       <Text style={styles.value}>{order?.stop_at_num !== null ? `滿 ${order?.stop_at_num} 人` : '未設定'}</Text>
-  
+
 
       <View style={styles.progressWrapper}></View>
-      
+
 
       <View style={styles.row}>
         <Text style={[styles.label, { fontWeight: 'bold' }]}>團主信息</Text>
@@ -114,9 +114,9 @@ export default function JoinOrderDetail() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fdf7ef', padding: 24 },
-  backButton: { 
+  backButton: {
     marginTop: 50,
-    marginBottom: 12 
+    marginBottom: 12
   },
   title: {
     fontSize: 20, fontWeight: 'bold', color: '#6c4d3f',
@@ -237,4 +237,3 @@ const styles = StyleSheet.create({
   },
 
 });
-

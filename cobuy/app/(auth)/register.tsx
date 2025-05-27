@@ -25,9 +25,9 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    const { username, password, nickname, real_name } = form;
+    const { username, password, real_name, email, school, student_id, dorm} = form;
 
-    if (!username || !password || !nickname || !real_name) {
+    if (!username || !password || !real_name || !email || !school || !student_id || !dorm) {
       Alert.alert('請填寫必填欄位');
       return;
     }
@@ -40,13 +40,13 @@ export default function Register() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>註冊帳號</Text>
 
-      <TextInput style={styles.input} placeholder="使用者名稱" onChangeText={text => handleChange('username', text)} />
-      <TextInput style={styles.input} placeholder="密碼" secureTextEntry onChangeText={text => handleChange('password', text)} />
+      <TextInput style={styles.input} placeholder="使用者名稱 (必填)" onChangeText={text => handleChange('username', text)} />
+      <TextInput style={styles.input} placeholder="密碼 (必填)" secureTextEntry onChangeText={text => handleChange('password', text)} />
       <TextInput style={styles.input} placeholder="暱稱" onChangeText={text => handleChange('nickname', text)} />
-      <TextInput style={styles.input} placeholder="真實姓名" onChangeText={text => handleChange('real_name', text)} />
-      <TextInput style={styles.input} placeholder="電子郵件" keyboardType="email-address" onChangeText={text => handleChange('email', text)} />
-      <TextInput style={styles.input} placeholder="學校" onChangeText={text => handleChange('school', text)} />
-      <TextInput style={styles.input} placeholder="學號" onChangeText={text => handleChange('student_id', text)} />
+      <TextInput style={styles.input} placeholder="真實姓名 (必填)" onChangeText={text => handleChange('real_name', text)} />
+      <TextInput style={styles.input} placeholder="電子郵件 (必填) (請填學校信箱)" keyboardType="email-address" onChangeText={text => handleChange('email', text)} />
+      <TextInput style={styles.input} placeholder="學校 (必填) (eg.NTU)" onChangeText={text => handleChange('school', text)} />
+      <TextInput style={styles.input} placeholder="學號 (必填)" onChangeText={text => handleChange('student_id', text)} />
       <TextInput style={styles.input} placeholder="宿舍名稱" onChangeText={text => handleChange('dorm', text)} />
       <TextInput style={styles.input} placeholder="電話" keyboardType="phone-pad" onChangeText={text => handleChange('phone', text)} />
 
