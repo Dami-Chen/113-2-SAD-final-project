@@ -215,7 +215,7 @@ router.post('/join', async (req, res) => {
 });
 
 // 棄單
-router.post('/api/abandonReport', async (req, res) => {
+router.post('/abandonReport', async (req, res) => {
   const {
     reporter_username,
     target_username,

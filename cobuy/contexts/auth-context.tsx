@@ -262,7 +262,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const reportAbandon = async (payload: {
     reporter_username: string;
     target_username: string;
-    order_id: number;
+    order_id: string;
     reason: string;
     reported_at: string;
     status: string;
