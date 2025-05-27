@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const orderRoutes = require('./routes/orders');
 const userRoutes = require('./routes/users');
 const indexRoutes = require('./routes/index');
+const notificationRoutes = require('./routes/notifications');
 const { initWebSocket } = require('./ws');
 
 require('dotenv').config();
@@ -18,6 +19,7 @@ app.use('/api', authRoutes);
 app.use('/api', orderRoutes);
 app.use('/api', userRoutes);
 app.use('/api', indexRoutes);
+app.use('/api', notificationRoutes);
 
 initWebSocket(server); // 初始化 WebSocket
 

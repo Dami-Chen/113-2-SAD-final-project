@@ -19,6 +19,14 @@ interface AuthContextType {
   getHostInfo: (username: string) => Promise<RegisterFormType>;
   openUserInfo:(username: string) => Promise<RegisterFormType>;
   updateUserInfo:(form:RegisterFormType) => Promise<void>;
+  reportAbandon: (payload: {
+    reporter_username: string;
+    target_username: string;
+    order_id: string;
+    reason: string;
+    reported_at: string;
+    status: string;
+  }) => Promise<void>;
 }
 
 export interface RegisterFormType {
@@ -60,8 +68,6 @@ export interface JoinOrderType {
   score: number;
   phone: string;
 }
-
-
 
 const AuthContext = createContext<AuthContextType | null>(null);
 const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -252,7 +258,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  
+  //棄單
+  const reportAbandon = async (payload: {
+    reporter_username: string;
+    target_username: string;
+    order_id: number;
+    reason: string;
+    reported_at: string;
+    status: string;
+  }) => {
+    try {
+      await axios.post(`${apiUrl}/api/abandonReport`, payload);
+    } catch (err: any) {
+      throw new Error(err.message || '送出棄單報告失敗');
+    }  
+  }
 
   const logout = async () => {
     setIsLoggedIn(false);
@@ -265,7 +285,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register, 
     createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo, 
-    openUserInfo, updateUserInfo}}>
+    openUserInfo, updateUserInfo, reportAbandon}}>
       {children}
     </AuthContext.Provider>
   );
