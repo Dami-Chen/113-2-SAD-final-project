@@ -22,7 +22,7 @@ router.post('/orders', async (req, res) => {
     comment,
     hashtag,
     pay_method,
-    label
+    labels
   } = req.body;
   try {
     const result = await pool.query('SELECT MAX(order_id) AS max_id FROM orders');

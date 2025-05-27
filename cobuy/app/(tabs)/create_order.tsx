@@ -34,7 +34,7 @@ const initialFormState: OrderFormType = {
   comment: '',
   hashtag: '',
   paymentMethod: '',
-  label: '',
+  labels: '',
 };
 
 
