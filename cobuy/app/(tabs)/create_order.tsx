@@ -34,6 +34,7 @@ const initialFormState: OrderFormType = {
   comment: '',
   hashtag: '',
   paymentMethod: '',
+  label: '',
 };
 
 
@@ -235,7 +236,7 @@ export default function CreateOrder(){
 
       <View style={styles.row}>
         <TextInput
-          placeholder="* 分送方式 e.g. 單包裝"
+          placeholder="* 分裝方式 e.g. 單包裝"
           style={[styles.input, styles.flex1]}
           value={form.share_method}
           onChangeText={text => handleChange('share_method', text)}
@@ -285,7 +286,7 @@ export default function CreateOrder(){
 
     {closingMethod === 'quantity' && (
         <TextInput
-          placeholder="設定人數上限"
+          placeholder="設定數量上限"
           style={styles.input}
           keyboardType="numeric"
           value={form.stop_at_num ? form.stop_at_num.toString() : ''}
