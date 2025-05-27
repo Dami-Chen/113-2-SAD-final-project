@@ -327,7 +327,7 @@ export default function CreateOrder(){
           onPress={() => {
             setClosingMethod('quantity');
             setShowDatePicker(false);
-            setForm(prev => ({ ...prev, stop_at_num: 0, stop_at_date: null }));
+            setForm(prev => ({ ...prev, stop_at_date: null, stop_at_num: -1 }));
           }}
         >
           <View style={styles.radioCircle}>
@@ -344,7 +344,7 @@ export default function CreateOrder(){
           onPress={() => {
             setClosingMethod('datetime');
             setShowDatePicker(true);
-            setForm(prev => ({ ...prev, stop_at_date: null, stop_at_num: 0 }));
+            setForm(prev => ({ ...prev, stop_at_date: form.stop_at_date, stop_at_num: 0 }));
           }}
         >
           <View style={styles.radioCircle}>
@@ -358,15 +358,7 @@ export default function CreateOrder(){
 
 
 
-    {closingMethod === 'quantity' && (
-        <TextInput
-          placeholder="設定人數上限"
-          style={styles.input}
-          keyboardType="numeric"
-          value={form.stop_at_num ? form.stop_at_num.toString() : ''}
-          onChangeText={text => handleChange('stop_at_num', text)}
-        />
-    )}
+
     {closingMethod === 'datetime' && (
       <View style={styles.dateInputRow}>
         <TextInput
@@ -634,8 +626,17 @@ const styles = StyleSheet.create({
 });
 
 
-
-
+/*
+{closingMethod === 'quantity' && (
+        <TextInput
+          placeholder="設定人數上限"
+          style={styles.input}
+          keyboardType="numeric"
+          value={form.stop_at_num ? form.stop_at_num.toString() : ''}
+          onChangeText={text => handleChange('stop_at_num', text)}
+        />
+    )}
+        */
 
 
 

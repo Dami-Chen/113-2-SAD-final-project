@@ -10,15 +10,17 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth, OrderFormType, JoinOrderType } from '../../contexts/auth-context';  // Adjust path as needed
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
+import OrderDetail from '../(stack)/open_order_detail';
 export default function HistoryOrder(){
   const router = useRouter();
-  const { historyOrder, username, getParticipantByOrder} = useAuth();
+  const { historyOrder, username, getParticipantByOrder, openOrderDetail, openJoinDetail} = useAuth();
   const { tab } = useLocalSearchParams();
   const initialTab = tab === 'join' ? 'join' : 'open';
   const [activeTab, setActiveTab] = useState<'open' | 'join'>(initialTab);
   const [openOrders, setOpenOrders] = useState<OrderFormType[]>([]);
   const [joinOrders, setJoinOrders] = useState<OrderFormType[]>([]);
-  const [joinedCounts, setJoinedCounts] = useState<{ [key: string]: number }>({});
+  const [joinedCounts, setJoinedCounts] = useState<{ [key: string]: number }>({});  
+  const [quantityCounts, setQuantity] = useState<{ [key: string]: number }>({});  
   const [loading, setLoading] = useState<boolean>(false);
   const [avatarUri, setAvatarUri] = useState(null);
 
@@ -30,7 +32,7 @@ export default function HistoryOrder(){
         aspect: [1, 1],
         quality: 1,
       });
-
+ 
       if (!result.canceled) {
         setAvatarUri(null);
         // result.assets[0].uri
@@ -64,17 +66,26 @@ export default function HistoryOrder(){
 
     const fetchJoinedCounts = async () => {
       const newCounts: { [key: string]: number } = {};
+      const newQuantity: { [key: string]: number } = {};
 
 
       await Promise.all(
         orders.map(async (order) => {
           try {
             const participants = await getParticipantByOrder(order.order_id) as unknown as JoinOrderType[];
+            const orderDetail = await openJoinDetail(order.order_id) as unknown as OrderFormType[];
+            // console.log('🔍 getParticipantByOrder response 衛生紙', participants);
             const totalJoined = participants.reduce(
               (acc: number, cur: { quantity: number }) => acc + Number(cur.quantity),
               0
             );
             newCounts[order.order_id] = totalJoined;
+            newQuantity[order.order_id] = Number(orderDetail[0].quantity) || 0; // 確保 quantity 有值
+
+
+            console.log(`取得參與者數量 ${order.order_id}:`, totalJoined);
+            //totalQuantity = Number(orderDetail[0].quantity);
+            // console.log(`取得總數量 ${orderDetail[0].quantity}`);
           } catch (err) {
             console.error(`取得參與者失敗：${order.order_id}`, err);
             newCounts[order.order_id] = 0;
@@ -84,6 +95,7 @@ export default function HistoryOrder(){
 
 
       setJoinedCounts(newCounts);
+      setQuantity(newQuantity);
     };
 
 
@@ -93,9 +105,10 @@ export default function HistoryOrder(){
   }, [activeTab, openOrders, joinOrders]);
 
 
-
+ 
   const renderOrderCard = (order: OrderFormType, isJoin = false) => {
     const totalJoined = joinedCounts[order.order_id] || 0;
+    const totalQuantity = quantityCounts[order.order_id] || 0; // 確保 quantity 有值
     return(
     <TouchableOpacity
       key={order.order_id}
@@ -108,11 +121,11 @@ export default function HistoryOrder(){
     >
       <View style={styles.cardTextArea}>
         <Text style={styles.cardTitle}>{order.item_name}</Text>
-        <Text style={styles.cardSub}>目前拼單數量：{totalJoined}/{order.quantity}</Text>
+        <Text style={styles.cardSub}>目前拼單數量：{totalJoined}/{totalQuantity}</Text>
         <Text style={styles.cardSub}>
         結單方式：
         {typeof order.stop_at_num === 'number' && order.stop_at_num !== 0
-          ? `滿 ${order.quantity} 個`
+          ? `滿 ${totalQuantity} 個`
           : typeof order.stop_at_date === 'string'
             ?  `${new Date(order.stop_at_date).toISOString().split('T')[0]}前`
             : '未設定'}
@@ -125,12 +138,14 @@ export default function HistoryOrder(){
 
         <View style={styles.progressBar} >
          <View style={[styles.progressFill, {
-            width: `${Math.min(Number(totalJoined) / Number(order.quantity), 1) * 100}%`,
+            width: `${Math.min(Number(totalJoined) / Number(totalQuantity), 1) * 100}%`,
           }]} />
          </View>
-
-
+     
+     
       </View>
+     
+
 
     </TouchableOpacity>
   );
@@ -164,8 +179,7 @@ export default function HistoryOrder(){
 
 
 const styles = StyleSheet.create({
-
-  container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40 },
   tabs: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -226,6 +240,25 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
 });
+
+
+/*
+<View style={styles.cardImageArea}>
+        <View style={styles.imageBox}>
+          {order.imageUrl ? (
+            <Image
+              source={: require(order.imageUrl )}
+              style={styles.avatar}
+              resizeMode="cover"
+            />
+          ) : (
+            <Text style={styles.noImageText}>no image</Text>
+          )}
+        </View>
+      </View>
+      */
+
+
 
 
 
