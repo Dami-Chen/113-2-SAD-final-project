@@ -15,6 +15,8 @@ import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth, OrderFormType } from '../../contexts/auth-context';  // Adjust path as needed
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
+import { Image, Modal } from 'react-native';
 
 const initialFormState: OrderFormType = {
   order_id: '',
@@ -50,7 +52,25 @@ export default function CreateOrder(){
   const [form, setForm] = useState<OrderFormType>(initialFormState);
   const [loading, setLoading] = useState(false);
 
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
+  const pickImage = async () => {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+  
+      if (!result.canceled && result.assets.length > 0) {
+        setAvatarUri(result.assets[0].uri); // 記得設 uri
+      }
+  };
+
+  const [category, setCategory] = useState('');
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [hashtagInput, setHashtagInput] = useState('');
+  const [hashtags, setHashtags] = useState<string[]>([]);
 
 
   const handleChange = (key: keyof OrderFormType, value: string) => {
@@ -92,6 +112,10 @@ export default function CreateOrder(){
       setMonthInput(String(new Date().getMonth() + 1));
       setDayInput(String(new Date().getDate()));
       setClosingMethod('quantity');
+      setAvatarUri(null);
+      setCategory('');
+      setHashtagInput('');
+      setHashtags([]); 
 
 
       // Navigate to history_order page after clearing form
@@ -106,7 +130,6 @@ export default function CreateOrder(){
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
-      <Text style={styles.title}>發起團購</Text>
 
 
       <TextInput
@@ -142,21 +165,73 @@ export default function CreateOrder(){
       </View>
 
 
-      <TouchableOpacity style={styles.uploadBox}>
-        <Ionicons name="cloud-upload-outline" size={24} color="#666" />
-        <Text style={{ color: '#666' }}> 上傳照片 </Text>
+      <TouchableOpacity style={styles.uploadBox} onPress={pickImage}>
+        {avatarUri ? (
+          <Image source={{ uri: avatarUri }} style={styles.previewImage} />
+        ) : (
+          <>
+            <Ionicons name="cloud-upload-outline" size={24} color="#666" />
+            <Text style={{ color: '#666' }}> 上傳照片 </Text>
+          </>
+        )}
       </TouchableOpacity>
 
 
       <TextInput
         placeholder="輸入商品資訊"
-        style={[styles.input, { height: 80 }]}
+        style={[styles.input, { height: 40 }]}
         multiline
         textAlignVertical="top"
         value={form.information}
         onChangeText={text => handleChange('information', text)}
       />
 
+      <Text style={{ marginBottom: 4, color: '#333' }}>商品類別</Text>
+      <TouchableOpacity
+        style={[styles.input, { justifyContent: 'center' }]}
+        onPress={() => setShowCategoryModal(true)}
+      >
+        <Text style={{ color: category ? '#000' : '#999' }}>
+          {category || '請選擇商品類別'}
+        </Text>
+      </TouchableOpacity>
+
+      <Text style={{ marginBottom: 4, color: '#333' }}>Hashtag 標籤</Text>
+      <View style={styles.row}>
+        <TextInput
+          placeholder="輸入 hashtag"
+          value={hashtagInput}
+          onChangeText={setHashtagInput}
+          style={[styles.inputHashtag, styles.flex1]}
+        />
+        <TouchableOpacity
+          style={[styles.addButton]}
+          onPress={() => {
+            const trimmed = hashtagInput.trim();
+            if (trimmed && !hashtags.includes(trimmed)) {
+              setHashtags([...hashtags, trimmed]);
+            }
+            setHashtagInput('');
+          }}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>加入</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.hashtagContainer}>
+        {hashtags.map((tag, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.hashtagBadge}
+            onPress={() => {
+              // 點擊標籤可移除
+              setHashtags(hashtags.filter((_, i) => i !== index));
+            }}
+          >
+            <Text style={styles.hashtagText}>#{tag}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <View style={styles.row}>
         <TextInput
@@ -272,6 +347,28 @@ export default function CreateOrder(){
       >
         <Text style={{ color: '#fff', fontWeight: 'bold' }}>確認發起團購</Text>
       </TouchableOpacity>
+
+      <Modal visible={showCategoryModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {['生活用品', '生鮮食品', '熟食', '零食點心', '調味料', '其他'].map(option => (
+              <TouchableOpacity
+                key={option}
+                onPress={() => {
+                  setCategory(option);
+                  setShowCategoryModal(false);
+                }}
+                style={styles.modalOption}
+              >
+                <Text style={{ fontSize: 16 }}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+              <Text style={{ textAlign: 'center', color: '#999', marginTop: 12 }}>取消</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -281,9 +378,9 @@ export default function CreateOrder(){
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#fdf7ef',
     padding: 16,
+    marginBottom: 40,
   },
   title: {
     marginBottom: 12,
@@ -368,6 +465,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 8, // optional if using React Native >= 0.71
+    marginBottom:12,
   },
   dateInput: {
     flex: 1,
@@ -377,5 +475,67 @@ const styles = StyleSheet.create({
     marginRight: 8,
     borderRadius: 4,
     textAlign: 'center',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 70,
+    resizeMode: 'cover',
+  },
+  previewImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 8,
+    resizeMode: 'cover',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    width: '80%',
+  },
+  modalOption: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  addButton: {
+    backgroundColor: '#c59b86',
+    height: 42,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  hashtagContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 0,
+    marginBottom: 8 ,
+    gap: 8,
+  },
+  hashtagBadge: {
+    backgroundColor: '#f2e3d5',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+  },
+  hashtagText: {
+    color: '#6c4d3f',
+    fontWeight: '500',
+  },
+  inputHashtag: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#fff',
   },
 });

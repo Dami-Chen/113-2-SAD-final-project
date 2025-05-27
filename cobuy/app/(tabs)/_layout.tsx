@@ -73,7 +73,7 @@ const _Layout = () => {
               }}
             />
           ),
-          title: '新增訂單'
+          title: '發起團購'
         }}
       />
       <Tabs.Screen
