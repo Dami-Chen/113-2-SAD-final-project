@@ -302,16 +302,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     reported_at: string;
     status: string;
   }) => {
-    console.log('📡 發送棄單請求:', payload);
+    try {
+      console.log('📡 發送棄單請求:', payload);
 
-    const response = await axios.post(
-      `${process.env.EXPO_PUBLIC_API_URL}/api/abandonReport`,
-      payload
-    );
+      const response = await axios.post(
+        `${apiUrl}/api/abandonReport`,
+        payload
+      );
 
-    return response.data;
-  }
- 
+      return response.data;
+    } catch (err: any) {
+      console.error('❌ reportAbandon 發送失敗:', err.response?.data || err.message);
+      throw new Error(err.response?.data?.error || '棄單送出失敗');
+    }
+  };
+
 
 
   const logout = async () => {
