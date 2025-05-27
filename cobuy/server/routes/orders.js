@@ -228,7 +228,7 @@ router.post('/abandonReport', async (req, res) => {
   console.log('📥 棄單 API 收到的 payload:', req.body); // ← 加這個印出 payload
 
   try {
-    const result = await db.query(insertAbandonReport, [
+    const result = await pool.query(insertAbandonReport, [
     reporter_username,
     target_username,
     order_id,
