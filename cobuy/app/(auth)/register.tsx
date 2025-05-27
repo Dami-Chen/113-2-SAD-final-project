@@ -1,11 +1,18 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, Pressable } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, Pressable, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth, RegisterFormType } from '../../contexts/auth-context';
+
+const dormList = ['女一舍', '女二舍', '女三舍', '女四舍', '女五舍', '女六舍', '女八舍', '女九舍', '男一舍', '男二舍'];
+
+
 
 export default function Register() {
   const router = useRouter();
   const { register } = useAuth();
+
+  const [showDormModal, setShowDormModal] = useState(false);
+  const [selectedDorm, setSelectedDorm] = useState('');
 
   const [form, setForm] = useState<RegisterFormType>({
     username: '',
@@ -34,6 +41,11 @@ export default function Register() {
       return;
     }
 
+    if (!/@.+\.edu\.tw$/.test(email)) {
+      Alert.alert('請輸入有效的學校信箱');
+      return;
+    }
+
     if (!agree) {
       Alert.alert('請閱讀並同意用戶條款');
       return;
@@ -44,6 +56,7 @@ export default function Register() {
   };
 
   return (
+    <>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-primary px-8 pt-20 pb-10">
         <Text className="text-3xl font-bold text-dark text-center mb-8">註冊帳號</Text>
 
@@ -105,13 +118,15 @@ export default function Register() {
           className="bg-block rounded-lg py-3 px-4 text-base text-dark mb-4"
         />
 
-        <TextInput
-          placeholder="宿舍名稱"
-          placeholderTextColor="#8D6F60"
-          value={form.dorm}
-          onChangeText={text => handleChange('dorm', text)}
+        <Pressable
+          onPress={() => setShowDormModal(true)}
           className="bg-block rounded-lg py-3 px-4 text-base text-dark mb-4"
-        />
+        >
+          <Text style={{ color: form.dorm ? '#4B3A34' : '#8D6F60' }}>
+            {form.dorm || '宿舍名稱 (必填)'}
+          </Text>
+        </Pressable>
+
 
         <TextInput
           placeholder="電話"
@@ -156,5 +171,32 @@ export default function Register() {
           <Text className="text-dark underline">已有帳號？前往登入</Text>
         </Pressable>
       </ScrollView>
+
+      <Modal
+        visible={showDormModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowDormModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%' }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>請選擇宿舍</Text>
+            {dormList.map(dorm => (
+              <Pressable
+                key={dorm}
+                onPress={() => {
+                  setSelectedDorm(dorm);
+                  setForm(prev => ({ ...prev, dorm }));
+                  setShowDormModal(false);
+                }}
+                style={{ paddingVertical: 10 }}
+              >
+                <Text style={{ fontSize: 16 }}>{dorm}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
+    </>
     )
 }

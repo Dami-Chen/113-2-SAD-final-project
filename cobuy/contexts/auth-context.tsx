@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await axios.post(`${apiUrl}/api/register`, {
         ...form,
-        score: 0,
+        score: 5,
       });
       alert('註冊成功，請登入');
     } catch (err: any) {
