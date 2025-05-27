@@ -58,6 +58,7 @@ export interface OrderFormType{
   comment: string;
   hashtag: string;
   paymentMethod: string;
+  labels: string;
 }
 
 export interface JoinOrderType {
