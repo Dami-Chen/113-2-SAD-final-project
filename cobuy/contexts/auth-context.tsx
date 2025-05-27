@@ -293,7 +293,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  //棄單
+  const reportAbandon = async (payload: {
+    reporter_username: string;
+    target_username: string;
+    order_id: string;
+    reason: string;
+    reported_at: string;
+    status: string;
+  }) => {
+    console.log('📡 發送棄單請求:', payload);
 
+    const response = await axios.post(
+      `${process.env.EXPO_PUBLIC_API_URL}/api/abandonReport`,
+      payload
+    );
+
+    return response.data;
+  }
  
 
 
@@ -309,7 +326,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register,
     createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo,
-    openUserInfo, updateUserInfo}}>
+    openUserInfo, updateUserInfo, reportAbandon}}>
       {children}
     </AuthContext.Provider>
   );

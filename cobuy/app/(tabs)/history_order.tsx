@@ -164,11 +164,8 @@ export default function HistoryOrder(){
 
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
-  container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40 },
-=======
+
   container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40, paddingBottom: 40 },
->>>>>>> 0086574a5763e2048290cd6536ffcea0dbf63104
   tabs: {
     flexDirection: 'row',
     paddingHorizontal: 16,
