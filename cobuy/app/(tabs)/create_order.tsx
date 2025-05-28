@@ -67,8 +67,8 @@ export default function CreateOrder(){
 
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
-
-
+ // 字的顏色
+  const getPlaceholderColor = (text: string) => text.includes('*') ? '#6c4d3f' : '#999';
 
   const pickImage = async () => {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -181,7 +181,8 @@ export default function CreateOrder(){
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
 
       <TextInput
-        placeholder="輸入團購物品名稱"
+        placeholder="* 輸入團購物品名稱"
+        placeholderTextColor={getPlaceholderColor("* 輸入團購物品名稱")}
         style={styles.input}
         value={form.item_name}
         onChangeText={text => handleChange('item_name', text)}
@@ -192,21 +193,24 @@ export default function CreateOrder(){
 
       <View style={styles.row}>
         <TextInput
-          placeholder="物品數量"
+          placeholder="* 物品數量"
+          placeholderTextColor={getPlaceholderColor("* 物品數量")}
           style={[styles.input, styles.flex1]}
           keyboardType="numeric"
-          value={form.quantity.toString()}
+          value={form.quantity != null ? form.quantity.toString() : ''}
           onChangeText={text => handleChange('quantity', text)}
         />
         <TextInput
-          placeholder="物品總價"
+          placeholder="* 物品總價"
+          placeholderTextColor={getPlaceholderColor("* 物品總價")}
           style={[styles.input, styles.flex1]}
           keyboardType="numeric"
           value={form.total_price.toString()}
           onChangeText={text => handleChange('total_price', text)}
         />
         <TextInput
-          placeholder="團購單價"
+          placeholder="* 團購單價"
+          placeholderTextColor={getPlaceholderColor("* 團購單價")}
           style={[styles.input, styles.flex1]}
           keyboardType="numeric"
           value={form.unit_price.toString()}
@@ -233,7 +237,7 @@ export default function CreateOrder(){
 
       <TextInput
         placeholder="輸入商品資訊"
-        style={[styles.input, { height: 40 }]}
+        style={[styles.input, { height: 45 }]}
         multiline
         textAlignVertical="top"
         value={form.information}
@@ -248,8 +252,8 @@ export default function CreateOrder(){
         style={[styles.input, { justifyContent: 'center' }]}
         onPress={() => setShowCategoryModal(true)}
       >
-        <Text style={{ color: category ? '#000' : '#999' }}>
-          {category || '請選擇商品類別'}
+        <Text style={{ color: category ? '#000' : '#6c4d3f' }}>
+          {category || '* 請選擇商品類別'}
         </Text>
       </TouchableOpacity>
 
@@ -304,13 +308,15 @@ export default function CreateOrder(){
 
       <View style={styles.row}>
         <TextInput
-          placeholder="分送方式 e.g. 單包裝"
+          placeholder="* 分送方式 e.g. 單包裝"
+          placeholderTextColor={getPlaceholderColor("* 分送方式 e.g. 單包裝")}
           style={[styles.input, styles.flex1]}
           value={form.share_method}
           onChangeText={text => handleChange('share_method', text)}
         />
         <TextInput
-          placeholder="分送地點"
+          placeholder="* 分送地點"
+          placeholderTextColor={getPlaceholderColor("* 分送地點")}
           style={[styles.input, styles.flex1]}
           value={form.share_location}
           onChangeText={text => handleChange('share_location', text)}
@@ -320,14 +326,14 @@ export default function CreateOrder(){
 
 
 
-      <Text style={{ marginBottom: 4, color: '#333' }}>結單方式</Text>
+      <Text style={{ marginBottom: 4, color: '#333' }}>* 結單方式</Text>
       <View style={styles.radioRow}>
         <TouchableOpacity
           style={styles.radioOption}
           onPress={() => {
             setClosingMethod('quantity');
             setShowDatePicker(false);
-            setForm(prev => ({ ...prev, stop_at_date: null, stop_at_num: -1 }));
+            setForm(prev => ({ ...prev, stop_at_date: null, stop_at_num: form.quantity }));
           }}
         >
           <View style={styles.radioCircle}>
@@ -409,7 +415,8 @@ export default function CreateOrder(){
         onChangeText={text => handleChange('comment', text)}
       />
       <TextInput
-        placeholder="支付方式（例如：現金）"
+        placeholder="* 可接受支付方式（例如：現金）"
+        placeholderTextColor={getPlaceholderColor("* 可接受支付方式（例如：現金）")}
         style={styles.input}
         value={form.paymentMethod}
         onChangeText={text => handleChange('paymentMethod', text)}

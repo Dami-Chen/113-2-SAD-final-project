@@ -10,6 +10,7 @@ interface AuthContextType {
   username: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
+  setRegisterForm: React.Dispatch<React.SetStateAction<RegisterFormType>>;
   register: (form: RegisterFormType) => Promise<void>;
   createOrder:(form: OrderFormType)  => Promise<void>;
   historyOrder: (username: string | null) => Promise<{openOrders: OrderFormType[];
@@ -88,6 +89,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
 
+  const [form, setRegisterForm] = useState<RegisterFormType>({
+      username: '',
+      password: '',
+      nickname: '',
+      real_name: '',
+      email: '',
+      school: '',
+      student_id: '',
+      dorm: '',
+      phone: '',
+      score: 5,
+    });
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -132,6 +145,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         score: 5,
       });
       alert('註冊成功，請登入');
+      // 註冊成功後清空表單狀態
+        setRegisterForm({
+            username: '',
+            password: '',
+            nickname: '',
+            real_name: '',
+            email: '',
+            school: '',
+            student_id: '',
+            dorm: '',
+            phone: '',
+            score: 5,
+          });
     } catch (err: any) {
       console.error('註冊失敗:', err);
       const errorMessage = err.response?.data?.error || '註冊失敗';
@@ -154,7 +180,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         information: form.information,
         share_method: form.share_method,
         share_location: form.share_location,
-        stop_at_num: form.stop_at_num,
+        stop_at_num: form.quantity,
         stop_at_date: form.stop_at_date,
         // stop_at_num:  5, // 確保有值
         // stop_at_date: null,
@@ -329,7 +355,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register,
+    <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register, form, setRegisterForm, // 傳出去，讓外面能更新
     createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo,
     openUserInfo, updateUserInfo, reportAbandon}}>
       {children}

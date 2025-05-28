@@ -3,34 +3,35 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, Pressable
 import { useRouter } from 'expo-router';
 import { useAuth, RegisterFormType } from '../../contexts/auth-context';
 
-const dormList = ['女一舍', '女二舍', '女三舍', '女四舍', '女五舍', '女六舍', '女八舍', '女九舍', '男一舍', '男二舍'];
+const dormList = ['女一舍', '女二舍', '女三舍', '女四舍', '女五舍', '女六舍', '女八舍', '女九舍', '男一舍', '男二舍',
+    '男三舍', '男四舍', '男五舍', '男六舍', '男七舍', '男八舍', '男九舍', '長興BOT', '水源BOT'];
 
 
 
 export default function Register() {
   const router = useRouter();
-  const { register } = useAuth();
+  const { form, setRegisterForm, register } = useAuth();
 
   const [showDormModal, setShowDormModal] = useState(false);
   const [selectedDorm, setSelectedDorm] = useState('');
 
-  const [form, setForm] = useState<RegisterFormType>({
-    username: '',
-    password: '',
-    nickname: '',
-    real_name: '',
-    email: '',
-    school: '',
-    student_id: '',
-    dorm: '',
-    phone: '',
-    score: 5,
-  });
+//   const [form, setForm] = useState<RegisterFormType>({
+//     username: '',
+//     password: '',
+//     nickname: '',
+//     real_name: '',
+//     email: '',
+//     school: '',
+//     student_id: '',
+//     dorm: '',
+//     phone: '',
+//     score: 5,
+//   });
 
   const [agree, setAgree] = useState(false);
 
   const handleChange = (key: keyof RegisterFormType, value: string) => {
-    setForm(prev => ({ ...prev, [key]: value }));
+    setRegisterForm(prev => ({ ...prev, [key]: value }));
   };
 
   const handleRegister = async () => {
@@ -186,7 +187,7 @@ export default function Register() {
                 key={dorm}
                 onPress={() => {
                   setSelectedDorm(dorm);
-                  setForm(prev => ({ ...prev, dorm }));
+                  setRegisterForm(prev => ({ ...prev, dorm }));
                   setShowDormModal(false);
                 }}
                 style={{ paddingVertical: 10 }}
