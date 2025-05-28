@@ -62,11 +62,12 @@ export default function useOrderWebSocket(username) {
         // 你也可以根據其他 type 類型處理更多功能
       } catch {}
     };
-
     ws.onerror = (err) => {
-      console.log('WebSocket error', err);
+      console.log('WebSocket error', err); // 不建議直接 Alert，可以只 log
     };
-    ws.onclose = () => {};
+    ws.onclose = () => {
+      console.log('WebSocket closed');
+    };
 
     return () => {
       ws.close();

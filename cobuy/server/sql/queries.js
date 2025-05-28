@@ -74,14 +74,32 @@ module.exports = {
       LIMIT $3 OFFSET $4
     )
     SELECT
-      o.*,
+      o.order_id,
+      o.item_name,
+      o.information,
+      o.host_username,
+      o.image_url,
+      o.share_method,
+      o.share_location,
+      o.stop_at_num,
+      o.stop_at_date,
+      o.hashtag,
+      o.pay_method,
+      o.comment,
+      o.total_price,
+      o.unit_price,
+      o.quantity,
+      o.labels,
+      o.created_at,
       COALESCE(SUM(j.quantity), 0) AS joined_count
     FROM
       base_orders o
     LEFT JOIN
       joined_order j ON o.order_id = j.order_id
     GROUP BY
-      o.order_id
+      o.order_id, o.item_name, o.information, o.host_username, o.image_url,
+      o.share_method, o.share_location, o.stop_at_num, o.stop_at_date, o.hashtag,
+      o.pay_method, o.comment, o.total_price, o.unit_price, o.quantity, o.labels, o.created_at
     ORDER BY
       o.order_id DESC
   `,

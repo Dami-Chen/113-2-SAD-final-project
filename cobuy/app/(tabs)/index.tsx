@@ -21,6 +21,7 @@ import { useAuth } from '../../contexts/auth-context'; // 請根據你的實際�
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
 const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+console.log('apiUrl =', apiUrl);
 
 // ---- API function ----
 async function fetchTags() {
@@ -34,6 +35,8 @@ async function fetchOrders({ search, tag, page = 1, pageSize = 20 }) {
   if (tag) url.searchParams.append('tag', tag);
   url.searchParams.append('page', page);
   url.searchParams.append('pageSize', pageSize);
+
+  console.log('fetchOrders URL:', url.toString());
 
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error('Failed to fetch orders');
@@ -77,7 +80,12 @@ export default function HomeScreen() {
 
   // 取得標籤
   useEffect(() => {
-    fetchTags().then(setTags).catch(() => setTags([]));
+    fetchTags()
+      .then(setTags)
+      .catch(e => {
+        console.error('fetchTags error', e);
+        setTags([]);
+      });
   }, []);
 
   // 取得商品列表
@@ -91,7 +99,10 @@ export default function HomeScreen() {
         const hosted = (data || []).filter(o => o.order_type === 'host').map(o => o.order_id);
         setExcludeOrderIds([...joined, ...hosted].map(id => String(id))); // 字串化避免型別 bug
       })
-      .catch(() => setExcludeOrderIds([]));
+      .catch(e => {
+        console.error('fetch history_order error', e);
+        setExcludeOrderIds([]);
+      });
   }, [username]);
 
   useEffect(() => {
@@ -99,9 +110,13 @@ export default function HomeScreen() {
     setError(null);
     fetchOrders({ search: searchText, tag: selectedTag })
       .then(setProducts)
-      .catch((err) => setError(err.message))
+      .catch(e => {
+        setError(e.message);
+        console.error('fetchOrders error', e);
+      })
       .finally(() => setLoading(false));
   }, [searchText, selectedTag]);
+
 
   // 點擊商品時打開 Modal 並抓詳細資料
   const handleOpenProduct = (item) => {
