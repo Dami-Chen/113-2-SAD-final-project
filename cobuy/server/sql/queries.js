@@ -90,7 +90,6 @@ module.exports = {
       o.unit_price,
       o.quantity,
       o.labels,
-      o.created_at,
       COALESCE(SUM(j.quantity), 0) AS joined_count
     FROM
       base_orders o
@@ -99,7 +98,7 @@ module.exports = {
     GROUP BY
       o.order_id, o.item_name, o.information, o.host_username, o.image_url,
       o.share_method, o.share_location, o.stop_at_num, o.stop_at_date, o.hashtag,
-      o.pay_method, o.comment, o.total_price, o.unit_price, o.quantity, o.labels, o.created_at
+      o.pay_method, o.comment, o.total_price, o.unit_price, o.quantity, o.labels
     ORDER BY
       o.order_id DESC
   `,
