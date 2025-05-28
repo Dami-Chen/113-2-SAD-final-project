@@ -68,8 +68,8 @@ module.exports = {
       SELECT *
       FROM orders
       WHERE 
-        ($1 IS NULL OR item_name ILIKE '%' || $1 || '%') AND
-        ($2 IS NULL OR hashtag = $2)
+        ($1::text IS NULL OR item_name ILIKE '%' || $1 || '%')
+        AND ($2::text IS NULL OR hashtag ILIKE '%' || $2 || '%')
       ORDER BY order_id DESC
       LIMIT $3 OFFSET $4
     )

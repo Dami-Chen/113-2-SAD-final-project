@@ -29,6 +29,7 @@ async function fetchTags() {
   if (!res.ok) throw new Error('Failed to fetch tags');
   return res.json();
 }
+
 async function fetchOrders({ search, tag, page = 1, pageSize = 20 }) {
   const url = new URL(`${apiUrl}/api/ordersdetail`);
   if (search) url.searchParams.append('search', search);
@@ -42,6 +43,7 @@ async function fetchOrders({ search, tag, page = 1, pageSize = 20 }) {
   if (!res.ok) throw new Error('Failed to fetch orders');
   return res.json();
 }
+
 async function fetchOrderDetail(orderId) {
   const res = await fetch(`${apiUrl}/api/ordersdetail/${orderId}`);
   if (!res.ok) throw new Error('Failed to fetch detail');
