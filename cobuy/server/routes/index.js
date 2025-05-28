@@ -9,7 +9,7 @@ router.get('/ordersdetail', async (req, res) => {
   const { search = null, tag = null, page = 1, pageSize = 20 } = req.query;
   const offset = (parseInt(page) - 1) * parseInt(pageSize);
   const result = await pool.query(
-    queries.getAllOrdersWithFilter,
+    queries.getAllOrdersWithJoinedCount,
     [search, tag, pageSize, offset]
   );
   res.json(result.rows);
@@ -78,9 +78,13 @@ router.post('/orders/:id/join', async (req, res) => {
 
     // WebSocket 即時通知
     notifyViaWebSocket(usernames, {
-      order_id: orderId,
-      message: messageText,
+      type: 'notification',
+      notification: {
+        title: '有一筆新拼單結單',
+        message: messageText,
+      }
     });
+
   }
 
   res.json({ status: 'ok' });

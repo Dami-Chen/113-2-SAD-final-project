@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TouchableOpacity, Modal, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  ActivityIndicator,
+} from 'react-native';
 import { useAuth } from '../../contexts/auth-context';
 
 const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -10,12 +19,15 @@ const Notification = () => {
 
   const [allMessages, setAllMessages] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState([]);
-  const { username } = useAuth(); // user 物件內有 username
+  const { username } = useAuth();
 
-  // --- 彈窗相關 state ---
+  // 彈窗 state
   const [orderDetailVisible, setOrderDetailVisible] = useState(false);
   const [orderDetailData, setOrderDetailData] = useState(null);
   const [orderDetailLoading, setOrderDetailLoading] = useState(false);
+
+  // 記錄已展開（opened）訊息 notification_id
+  const [openedSet, setOpenedSet] = useState(new Set());
 
   // 取得通知列表
   useEffect(() => {
@@ -43,6 +55,27 @@ const Notification = () => {
       });
     } catch {}
   }
+
+  // 批次標記已讀（只針對展開過的）
+  useEffect(() => {
+    if (selectedTab !== 'unread' && openedSet.size > 0) {
+      const openedUnread = unreadMessages.filter(msg => openedSet.has(msg.notification_id));
+      if (openedUnread.length > 0) {
+        openedUnread.forEach(msg => {
+          markAsRead(msg.notification_id, username);
+        });
+        setAllMessages(prev =>
+          prev.map(m =>
+            openedSet.has(m.notification_id) ? { ...m, is_read: true } : m
+          )
+        );
+        setUnreadMessages(prev =>
+          prev.filter(m => !openedSet.has(m.notification_id))
+        );
+        setOpenedSet(new Set());
+      }
+    }
+  }, [selectedTab]);
 
   // 取得訂單詳細
   async function fetchOrderDetail(orderId) {
@@ -93,30 +126,21 @@ const Notification = () => {
           renderMessages.map((msg, index) => (
             <TouchableOpacity
               key={msg.notification_id || index}
-              onPress={async () => {
+              onPress={() => {
                 setExpandedIndex(index === expandedIndex ? null : index);
-
-                if (!msg.is_read) {
-                  await markAsRead(msg.notification_id, username);
-                  setAllMessages(prev =>
-                    prev.map(m =>
-                      m.notification_id === msg.notification_id
-                        ? { ...m, is_read: true }
-                        : m
-                    )
-                  );
-                  setUnreadMessages(prev => prev.filter(m => m.notification_id !== msg.notification_id));
+                // 展開訊息時記錄 notification_id
+                if (index !== expandedIndex) {
+                  setOpenedSet(prev => new Set(prev).add(msg.notification_id));
                 }
               }}
             >
               <View style={styles.messageBox}>
                 <Text>{msg.title}</Text>
                 <Text style={{ color: '#666', fontSize: 13, marginVertical: 4 }}>{msg.message}</Text>
-                <Text style={{ color: '#bbb', fontSize: 11 }}>{msg.created_at?.slice(0,16)}</Text>
+                <Text style={{ color: '#bbb', fontSize: 11 }}>{msg.created_at?.slice(0, 16)}</Text>
                 {expandedIndex === index && (
                   <View style={styles.expandedCard}>
                     {msg.order_id && <Text style={styles.expandedText}>訂單編號：{msg.order_id}</Text>}
-                    {/* 可以加其他細節 */}
                     <Pressable
                       style={styles.orderButton}
                       onPress={() => fetchOrderDetail(msg.order_id)}
@@ -166,7 +190,7 @@ const Notification = () => {
                 <Text>分送地點：{orderDetailData.share_location || '無'}</Text>
                 <Text>
                   結單方式：{
-                    orderDetailData.stop_at_num != null
+                    orderDetailData.stop_at_num != 0
                       ? `數量達到 ${orderDetailData.stop_at_num}`
                       : orderDetailData.stop_at_date != null
                         ? `${orderDetailData.stop_at_date} 截止`

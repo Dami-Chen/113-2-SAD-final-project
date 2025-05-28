@@ -63,6 +63,29 @@ module.exports = {
     ORDER BY cnt DESC
     LIMIT 5
   `,
+  getAllOrdersWithJoinedCount: `
+    WITH base_orders AS (
+      SELECT *
+      FROM orders
+      WHERE 
+        ($1 IS NULL OR item_name ILIKE '%' || $1 || '%') AND
+        ($2 IS NULL OR hashtag = $2)
+      ORDER BY order_id DESC
+      LIMIT $3 OFFSET $4
+    )
+    SELECT
+      o.*,
+      COALESCE(SUM(j.quantity), 0) AS joined_count
+    FROM
+      base_orders o
+    LEFT JOIN
+      joined_order j ON o.order_id = j.order_id
+    GROUP BY
+      o.order_id
+    ORDER BY
+      o.order_id DESC
+  `,
+
 
 
   // ======== 留言 OrderComment ========
