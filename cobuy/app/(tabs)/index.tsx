@@ -14,6 +14,7 @@ import {
   Pressable,
   Modal,
   ActivityIndicator,
+  Alert
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/auth-context'; // 請根據你的實際路徑調整
@@ -200,7 +201,10 @@ export default function HomeScreen() {
       }
 
       if (res.ok) {
-        alert('成功加入拼單！');
+        Alert.alert(
+          '確認信息',
+          `成功加入商品【${selectedProductDetail.item_name}】的拼單！`,
+          [{ text: '確認' }]);
         setModalVisible(false);
 
         // 重新刷新商品列表
@@ -243,7 +247,7 @@ export default function HomeScreen() {
   const renderHeader = () => (
     <View>
       <View style={styles.header}>
-        <Text style={styles.logo}>西敗</Text>
+        <Text style={styles.logo}>CoBuy</Text>
         <TouchableOpacity onPress={() => router.push('/profile/info')}>
           <Ionicons name="person-circle-outline" size={28} color="#B38F7D" />
         </TouchableOpacity>
