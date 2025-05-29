@@ -223,8 +223,8 @@ export default function HomeScreen() {
   const now = new Date();
   // products 是你的全部商品列表
   const filteredProducts = products.filter((item) => {
-    // 1. 排除自己已經參加/自己開的單
-    if (excludeOrderIds.includes(String(item.order_id))) return false;
+    // // 1. 排除自己已經參加/自己開的單
+    // if (excludeOrderIds.includes(String(item.order_id))) return false;
 
     // 2. 已額滿（如果 stop_at_num !== null && quantity >= stop_at_num
     if (
