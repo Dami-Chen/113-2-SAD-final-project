@@ -87,7 +87,7 @@ export default function Register() {
         />
 
         <TextInput
-          placeholder="真實姓名 (必填)"
+          placeholder="真實姓名"
           placeholderTextColor="#8D6F60"
           value={form.real_name}
           onChangeText={text => handleChange('real_name', text)}
@@ -112,7 +112,7 @@ export default function Register() {
         />
 
         <TextInput
-          placeholder="學號 (必填)"
+          placeholder="學號"
           placeholderTextColor="#8D6F60"
           value={form.student_id}
           onChangeText={text => handleChange('student_id', text)}
