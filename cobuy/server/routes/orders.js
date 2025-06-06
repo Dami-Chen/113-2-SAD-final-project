@@ -4,6 +4,15 @@ const pool = require('../db');
 const queries = require('../sql/queries');
 const { sendOneSignalNotification } = require('../onesignal');
 const { notifyViaWebSocket } = require('../ws');
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+
+useFocusEffect(
+  useCallback(() => {
+    fetchOrderDetails(); // 你自己的資料抓取函數
+  }, [])
+);
+
 
 // 開團
 router.post('/orders', async (req, res) => {
@@ -56,6 +65,7 @@ router.post('/orders', async (req, res) => {
     ]);
     res.status(201).json({ message: '開團成功' });
   } catch (err) {
+    console.error('❌ 開團失敗:', err); 
     res.status(500).json({ error: '開團失敗', detail: err.message });
   }
 });
