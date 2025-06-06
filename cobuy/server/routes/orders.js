@@ -4,14 +4,6 @@ const pool = require('../db');
 const queries = require('../sql/queries');
 const { sendOneSignalNotification } = require('../onesignal');
 const { notifyViaWebSocket } = require('../ws');
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
-
-useFocusEffect(
-  useCallback(() => {
-    fetchOrderDetails(); // 你自己的資料抓取函數
-  }, [])
-);
 
 
 // 開團
