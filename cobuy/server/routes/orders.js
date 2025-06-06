@@ -22,7 +22,8 @@ router.post('/orders', async (req, res) => {
     comment,
     hashtag,
     pay_method,
-    labels
+    labels,
+    delivery_time
   } = req.body;
   try {
     const result = await pool.query('SELECT MAX(order_id) AS max_id FROM orders');
@@ -52,7 +53,8 @@ router.post('/orders', async (req, res) => {
       comment,
       hashtag,
       pay_method,
-      labels
+      labels,
+      delivery_time
     ]);
     res.status(201).json({ message: '開團成功' });
   } catch (err) {

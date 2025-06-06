@@ -63,6 +63,8 @@ export interface OrderFormType{
   hashtag: string;
   paymentMethod: string;
   labels: string;
+  delivery_time:string;
+
 }
 
 
@@ -174,22 +176,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         username: form.host_username,  // host_username
         item_name: form.item_name,
         quantity: form.quantity,
-        total_price: form.total_price,
+        total_price: form.unit_price,
         unit_price: form.unit_price,
         image_Url: form.imageUrl,
         information: form.information,
         share_method: form.share_method,
         share_location: form.share_location,
         stop_at_num: form.quantity,
-        stop_at_date: form.stop_at_date,
-        // stop_at_num:  5, // 確保有值
+        stop_at_date: form.stop_at_date
+        ? new Date(form.stop_at_date).toISOString().split('T')[0]
+        : null,        // stop_at_num:  5, // 確保有值
         // stop_at_date: null,
         comment: form.comment,
         hashtag: form.hashtag,
         pay_method: form.paymentMethod,
         labels: form.labels,
+        delivery_time: form.delivery_time,
       });
       alert('成功，團購已發起');
+      console.log('✅ createOrder API response: 團購已發起');
     } catch (err: any) {
       console.log("❌ create order error:", err);
       alert(err.response?.data?.error || '發起團購失敗');
