@@ -8,7 +8,7 @@ module.exports = {
     SELECT * FROM users WHERE username = $1 AND password = $2
   `,
   getUserProfile: `
-    SELECT username, nickname, real_name, email, dorm, score, phone
+    SELECT username, nickname, real_name, email, dorm, score, phone, school, student_id
     FROM users
     WHERE username = $1
   `,
@@ -29,12 +29,13 @@ module.exports = {
     INSERT INTO orders (
       order_id, host_username, item_name, quantity, total_price,
       unit_price, image_url, information, share_method, share_location,
-      stop_at_num, stop_at_date, comment, hashtag, pay_method
+      stop_at_num, stop_at_date, comment, hashtag, pay_method, labels
     )
     VALUES (
       $1, $2, $3, $4, $5,
       $6, $7, $8, $9, $10,
-      $11, $12, $13, $14, $15
+      $11, $12, $13, $14, $15,
+      $16
     )
   `
 ,
@@ -62,6 +63,46 @@ module.exports = {
     ORDER BY cnt DESC
     LIMIT 5
   `,
+  getAllOrdersWithJoinedCount: `
+    WITH base_orders AS (
+      SELECT *
+      FROM orders
+      WHERE 
+        ($1::text IS NULL OR item_name ILIKE '%' || $1 || '%')
+        AND ($2::text IS NULL OR hashtag ILIKE '%' || $2 || '%')
+      ORDER BY order_id DESC
+      LIMIT $3 OFFSET $4
+    )
+    SELECT
+      o.order_id,
+      o.item_name,
+      o.information,
+      o.host_username,
+      o.image_url,
+      o.share_method,
+      o.share_location,
+      o.stop_at_num,
+      o.stop_at_date,
+      o.hashtag,
+      o.pay_method,
+      o.comment,
+      o.total_price,
+      o.unit_price,
+      o.quantity,
+      o.labels,
+      COALESCE(SUM(j.quantity), 0) AS joined_count
+    FROM
+      base_orders o
+    LEFT JOIN
+      joined_order j ON o.order_id = j.order_id
+    GROUP BY
+      o.order_id, o.item_name, o.information, o.host_username, o.image_url,
+      o.share_method, o.share_location, o.stop_at_num, o.stop_at_date, o.hashtag,
+      o.pay_method, o.comment, o.total_price, o.unit_price, o.quantity, o.labels
+    ORDER BY
+      o.order_id DESC
+  `,
+
 
 
   // ======== 留言 OrderComment ========
@@ -114,5 +155,14 @@ module.exports = {
     SELECT
       (SELECT COUNT(*) FROM orders WHERE host_username = $1) AS created_orders,
       (SELECT COUNT(*) FROM joined_order WHERE username = $1) AS joined_orders
+  `,
+
+  // ======== 棄單相關 =========
+  insertAbandonReport: `
+    INSERT INTO abandon_report (
+      reporter_username, target_username, order_id,
+      reason, reported_at, status
+    ) VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *
   `
 };

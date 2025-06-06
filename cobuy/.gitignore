@@ -43,3 +43,8 @@ yarn-error.*
 app-example
 
 .DS_Store
+
+.jpg
+.png
+.pdf
+/server/uploads/

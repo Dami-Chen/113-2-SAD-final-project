@@ -9,17 +9,36 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAuth, OrderFormType, JoinOrderType } from '../../contexts/auth-context';  // Adjust path as needed
 import axios from 'axios';
-
+import * as ImagePicker from 'expo-image-picker';
+import OrderDetail from '../(stack)/open_order_detail';
 export default function HistoryOrder(){
   const router = useRouter();
-  const { historyOrder, username} = useAuth();
+  const { historyOrder, username, getParticipantByOrder, openOrderDetail, openJoinDetail} = useAuth();
   const { tab } = useLocalSearchParams();
   const initialTab = tab === 'join' ? 'join' : 'open';
   const [activeTab, setActiveTab] = useState<'open' | 'join'>(initialTab);
   const [openOrders, setOpenOrders] = useState<OrderFormType[]>([]);
   const [joinOrders, setJoinOrders] = useState<OrderFormType[]>([]);
+  const [joinedCounts, setJoinedCounts] = useState<{ [key: string]: number }>({});  
+  const [quantityCounts, setQuantity] = useState<{ [key: string]: number }>({});  
   const [loading, setLoading] = useState<boolean>(false);
-  
+  const [avatarUri, setAvatarUri] = useState(null);
+
+
+  const pickImage = async () => {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+ 
+      if (!result.canceled) {
+        setAvatarUri(null);
+        // result.assets[0].uri
+      }
+    };
+
 
   useEffect(() => {
   const loadHistory = async () => {
@@ -36,37 +55,102 @@ export default function HistoryOrder(){
     }
   };
 
+
   loadHistory();
   }, [username]);
 
 
-  const renderOrderCard = (order: OrderFormType, isJoin = false) => (
+  useEffect(() => {
+    const orders = activeTab === 'open' ? openOrders : joinOrders;
+
+
+    const fetchJoinedCounts = async () => {
+      const newCounts: { [key: string]: number } = {};
+      const newQuantity: { [key: string]: number } = {};
+
+
+      await Promise.all(
+        orders.map(async (order) => {
+          try {
+            const participants = await getParticipantByOrder(order.order_id) as unknown as JoinOrderType[];
+            const orderDetail = await openJoinDetail(order.order_id) as unknown as OrderFormType[];
+            // console.log('🔍 getParticipantByOrder response 衛生紙', participants);
+            const totalJoined = participants.reduce(
+              (acc: number, cur: { quantity: number }) => acc + Number(cur.quantity),
+              0
+            );
+            newCounts[order.order_id] = totalJoined;
+            newQuantity[order.order_id] = Number(orderDetail[0].quantity) || 0; // 確保 quantity 有值
+
+
+            console.log(`取得參與者數量 ${order.order_id}:`, totalJoined);
+            //totalQuantity = Number(orderDetail[0].quantity);
+            // console.log(`取得總數量 ${orderDetail[0].quantity}`);
+          } catch (err) {
+            console.error(`取得參與者失敗：${order.order_id}`, err);
+            newCounts[order.order_id] = 0;
+          }
+        })
+      );
+
+
+      setJoinedCounts(newCounts);
+      setQuantity(newQuantity);
+    };
+
+
+    if ((activeTab === 'open' && openOrders.length > 0) || (activeTab === 'join' && joinOrders.length > 0)) {
+      fetchJoinedCounts();
+    }
+  }, [activeTab, openOrders, joinOrders]);
+
+
+ 
+  const renderOrderCard = (order: OrderFormType, isJoin = false) => {
+    const totalJoined = joinedCounts[order.order_id] || 0;
+    const totalQuantity = quantityCounts[order.order_id] || 0; // 確保 quantity 有值
+    return(
     <TouchableOpacity
       key={order.order_id}
       style={styles.card}
       onPress={() =>
         router.push(`/(stack)/${isJoin ? 'join_order_detail' : 'open_order_detail'}?id=${order.order_id}`)
       }
+
+
     >
       <View style={styles.cardTextArea}>
         <Text style={styles.cardTitle}>{order.item_name}</Text>
-        <Text style={styles.cardSub}>目前拼單數量：{order.quantity}/{order.stop_at_num}</Text>
-        <Text style={styles.cardSub}>結單方式：{order.stop_at_num}</Text>
+        <Text style={styles.cardSub}>目前拼單數量：{totalJoined}/{totalQuantity}</Text>
+        <Text style={styles.cardSub}>
+        結單方式：
+        {typeof order.stop_at_num === 'number' && order.stop_at_num !== 0
+          ? `滿 ${totalQuantity} 個`
+          : typeof order.stop_at_date === 'string'
+            ?  `${new Date(order.stop_at_date).toISOString().split('T')[0]}前`
+            : '未設定'}
+      </Text>
+
+
+
+
+
+
         <View style={styles.progressBar} >
          <View style={[styles.progressFill, {
-            width: `${Math.min(Number(order.quantity) / Number(order.stop_at_num), 1) * 100}%`,
+            width: `${Math.min(Number(totalJoined) / Number(totalQuantity), 1) * 100}%`,
           }]} />
          </View>
-      
-      
+     
+     
       </View>
-      <View style={styles.cardImageArea}>
-        <View style={styles.imageBox}>
-          {/* 可放圖片 */}
-        </View>
-      </View>
+     
+
+
     </TouchableOpacity>
   );
+};
+
 
   return (
     <View style={styles.container}>
@@ -76,11 +160,13 @@ export default function HistoryOrder(){
           {activeTab === 'open' && <View style={styles.underline} />}
         </TouchableOpacity>
 
+
         <TouchableOpacity onPress={() => setActiveTab('join')} style={styles.tabButton}>
           <Text style={[styles.tabText, activeTab === 'join' && styles.tabTextActive]}>拼單</Text>
           {activeTab === 'join' && <View style={styles.underline} />}
         </TouchableOpacity>
       </View>
+
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
         {(activeTab === 'open' ? openOrders : joinOrders).map(order =>
@@ -90,6 +176,7 @@ export default function HistoryOrder(){
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fdf7ef', paddingTop: 40 },
@@ -140,6 +227,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#c59b86',
     borderRadius: 999,
   },
+  noImageText: {
+  textAlign: 'center',
+  color: '#888',
+  fontSize: 14,
+  padding: 10,
+},
+ avatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 70,
+    resizeMode: 'cover',
+  },
 });
+
+
+/*
+<View style={styles.cardImageArea}>
+        <View style={styles.imageBox}>
+          {order.imageUrl ? (
+            <Image
+              source={: require(order.imageUrl )}
+              style={styles.avatar}
+              resizeMode="cover"
+            />
+          ) : (
+            <Text style={styles.noImageText}>no image</Text>
+          )}
+        </View>
+      </View>
+      */
+
+
+
 
 

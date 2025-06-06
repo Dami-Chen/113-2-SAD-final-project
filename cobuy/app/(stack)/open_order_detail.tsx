@@ -9,7 +9,7 @@ import axios from 'axios';
 
 export default function OrderDetail() {
   const router = useRouter();
-  const { id } = useLocalSearchParams() as {id: string};
+  const { id } = useLocalSearchParams() as { id: string};
   const { username, openOrderDetail, getParticipantByOrder} = useAuth();
   const [order, setOrder] = useState<OrderFormType | null>(null);
   const [participants, setParticipants] = useState<JoinOrderType[]>([]);
@@ -27,7 +27,7 @@ export default function OrderDetail() {
       try {
         const orders = (await openOrderDetail(username!)) as unknown as OrderFormType[]; 
         console.log('🔍 openOrderDetail response', orders);
-        const foundOrder = orders.find(order => order.order_id === id);
+        const foundOrder = orders.find(order => String(order.order_id) === String(id));
         console.log('🔍 foundOrder', foundOrder);
         setOrder(foundOrder || null);
 
@@ -82,7 +82,7 @@ export default function OrderDetail() {
       </View>
 
       <Text style={styles.label}>結單方式</Text>
-      <Text style={styles.value}>{order?.stop_at_num !== null ? `滿 ${order?.stop_at_num} 人` : '未設定'}</Text>
+      <Text style={styles.value}>{order?.stop_at_num !== null ? `滿 ${order?.quantity} 個` : '未設定'}</Text>
 
       <View style={styles.progressBar} />
 

@@ -40,6 +40,9 @@ import './globals.css';
 import { OneSignal } from 'react-native-onesignal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import useOrderWebSocket from './hooks/useOrderWebSocket'; 
+import { Alert } from 'react-native';
+
 function AuthGate() {
   const { isLoggedIn } = useAuth();
   const segments = useSegments();
@@ -81,7 +84,7 @@ export default function RootLayout() {
 
 // 新增 OneSignal 初始化邏輯
 function AppInitializer() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, username } = useAuth();
 
   useEffect(() => {
   OneSignal.initialize('3075acf3-0518-4ac3-9aeb-c1115ab2fb05');
@@ -99,6 +102,9 @@ function AppInitializer() {
   requestPermission();
 
 }, [isLoggedIn]);
+
+// ★★★ 這一行是重點！！只要登入就自動全域監聽 WebSocket 新通知
+  useOrderWebSocket(isLoggedIn ? username : null);
 
   return <AuthGate />;
 }

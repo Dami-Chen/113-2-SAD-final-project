@@ -18,12 +18,12 @@ const _Layout = () => {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 16,
+          bottom: 0,
           left: 16,
           right: 16,
           height: 56,
           backgroundColor: '#FFF8F0',
-          borderRadius: 28,
+          borderRadius: 0,
           elevation: 5,
         },
       }}
@@ -73,7 +73,7 @@ const _Layout = () => {
               }}
             />
           ),
-          title: '新增訂單'
+          title: '發起團購'
         }}
       />
       <Tabs.Screen
@@ -99,7 +99,7 @@ const _Layout = () => {
               color={focused ? '#B38F7D' : '#AAA'}
             />
           ),
-          title: '我我我'
+          title: username || '個人資訊',
         }}
       />
     </Tabs>
