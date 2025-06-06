@@ -24,9 +24,10 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./cobuy
-        - run: npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
 
       - name: Run tests
         working-directory: ./cobuy
         run: npm test
+# test
