@@ -124,11 +124,12 @@ export default function HistoryOrder(){
         <Text style={styles.cardSub}>目前拼單數量：{totalJoined}/{totalQuantity}</Text>
         <Text style={styles.cardSub}>
         結單方式：
-        {typeof order.stop_at_num === 'number' && order.stop_at_num !== 0
-          ? `滿 ${totalQuantity} 個`
-          : typeof order.stop_at_date === 'string'
-            ?  `${new Date(order.stop_at_date).toISOString().split('T')[0]}前`
+        {order.stop_at_date
+          ? `${new Date(order.stop_at_date).toISOString().split('T')[0]}前`
+          : typeof order.stop_at_num === 'number' && order.stop_at_num !== 0
+            ? `滿 ${totalQuantity} 個`
             : '未設定'}
+
       </Text>
 
 

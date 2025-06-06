@@ -404,10 +404,17 @@ export default function JoinOrderDetail() {
       </View>
 
       <View style={styles.row}>
-        <View style={styles.inputBox}>
-          <Text style={styles.label}>結單方式</Text>
-          <Text style={styles.value}>{order?.stop_at_num !== null ? `滿 ${order?.quantity} 個` : '未設定'}</Text>
-        </View>
+        <View style={styles.inputBox}> 
+        <Text style={styles.label}>結單方式</Text>
+        <Text style={styles.value}>
+          {order?.stop_at_date
+            ? `${new Date(order.stop_at_date).toISOString().split('T')[0]}前`
+            : typeof order?.stop_at_num === 'number' && order.stop_at_num !== 0
+              ? `滿 ${order?.quantity} 個`
+              : '未設定'}
+        </Text>
+      </View>
+
         <View style={styles.inputBox}>
           <Text style={styles.label}>結單時間</Text>
           <Text style={styles.value}>{order?.delivery_time? new Date(order.delivery_time).toISOString().split('T')[0]: '未設定'}</Text>
