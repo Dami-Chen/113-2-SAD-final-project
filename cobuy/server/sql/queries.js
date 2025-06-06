@@ -23,6 +23,7 @@ module.exports = {
     WHERE username = $1;
   `,
 
+
   // title, description, creator_id, limit_count, deadline
   // ======== 開團 Orders ========
   createOrder: `
@@ -67,7 +68,7 @@ module.exports = {
     WITH base_orders AS (
       SELECT *
       FROM orders
-      WHERE 
+      WHERE
         ($1::text IS NULL OR item_name ILIKE '%' || $1 || '%')
         AND ($2::text IS NULL OR hashtag ILIKE '%' || $2 || '%')
       ORDER BY order_id DESC
@@ -105,6 +106,9 @@ module.exports = {
 
 
 
+
+
+
   // ======== 留言 OrderComment ========
   createComment: `
     INSERT INTO ordercomment (order_id, username, message, created_at)
@@ -115,6 +119,7 @@ module.exports = {
     WHERE order_id = $1
     ORDER BY created_at ASC
   `,
+
 
   // ======== 參與訂單 JoinedOrder ========
   joinOrder: `
@@ -129,13 +134,14 @@ module.exports = {
     JOIN users u ON jo.username = u.username
     WHERE jo.order_id = $1
   `,
-  
+ 
   getOrdersJoinedByUser: `
     SELECT o.*, jo.quantity
     FROM joined_order jo
     JOIN orders o ON jo.order_id = o.order_id
     WHERE jo.username = $1
   `,
+
 
   // ======== 宿舍 Dorm ========
   getAllDorms: `
@@ -144,6 +150,7 @@ module.exports = {
   getDormArea: `
     SELECT area FROM dorm WHERE dorm_name = $1
   `,
+
 
   // ======== 統計用 ========
   getOrderParticipantCount: `
@@ -157,6 +164,7 @@ module.exports = {
       (SELECT COUNT(*) FROM joined_order WHERE username = $1) AS joined_orders
   `,
 
+
   // ======== 棄單相關 =========
   insertAbandonReport: `
     INSERT INTO abandon_report (
@@ -166,3 +174,6 @@ module.exports = {
     RETURNING *
   `
 };
+
+
+
