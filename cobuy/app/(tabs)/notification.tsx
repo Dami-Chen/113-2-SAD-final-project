@@ -9,7 +9,7 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
-import { useAuth } from '../../contexts/auth-context';
+import { OrderFormType, useAuth, NotificationItem } from '../../contexts/auth-context';
 
 const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
@@ -17,13 +17,13 @@ const Notification = () => {
   const [selectedTab, setSelectedTab] = useState<'unread' | 'all'>('all');
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  const [allMessages, setAllMessages] = useState([]);
-  const [unreadMessages, setUnreadMessages] = useState([]);
+  const [allMessages, setAllMessages] = useState<NotificationItem[]>([]);
+  const [unreadMessages, setUnreadMessages] = useState<NotificationItem[]>([]);
   const { username } = useAuth();
 
   // 彈窗 state
   const [orderDetailVisible, setOrderDetailVisible] = useState(false);
-  const [orderDetailData, setOrderDetailData] = useState(null);
+  const [orderDetailData, setOrderDetailData] = useState<OrderFormType | null>(null);
   const [orderDetailLoading, setOrderDetailLoading] = useState(false);
 
   // 記錄已展開（opened）訊息 notification_id
@@ -82,7 +82,7 @@ const Notification = () => {
     setOrderDetailLoading(true);
     setOrderDetailData(null);
     try {
-      const res = await fetch(`${apiUrl}/api/ordersdetail/${orderId}`);
+      const res = await fetch(`${apiUrl}/api/orders/${orderId}`);
       if (!res.ok) throw new Error('Failed to fetch detail');
       const data = await res.json();
       setOrderDetailData(data);

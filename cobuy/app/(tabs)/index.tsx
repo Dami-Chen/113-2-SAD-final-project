@@ -17,7 +17,7 @@ import {
  Alert,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import { useAuth } from '../../contexts/auth-context'; // 請根據你的實際路徑調整
+import { OrderFormType, useAuth } from '../../contexts/auth-context'; // 請根據你的實際路徑調整
 
 
 const { width } = Dimensions.get('window');
@@ -25,9 +25,11 @@ const CARD_WIDTH = (width - 48) / 2;
 const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 console.log('apiUrl =', apiUrl);
 
+
+
 // ---- API function ----
 async function fetchTags() {
- const res = await fetch(`${apiUrl}/api/tags`);
+ const res = await fetch(`${apiUrl}/api/orders/tags/popular`);
  if (!res.ok) throw new Error('Failed to fetch tags');
  return res.json();
 }
@@ -37,8 +39,8 @@ async function fetchOrders({ search, tag, page = 1, pageSize = 20 }) {
  const url = new URL(`${apiUrl}/api/orders`);
  if (search) url.searchParams.append('search', search);
  if (tag) url.searchParams.append('tag', String(tag));
- url.searchParams.append('page', page);
- url.searchParams.append('pageSize', pageSize);
+ url.searchParams.append('page', String(page));
+ url.searchParams.append('pageSize', String(pageSize));
 
 
  console.log('fetchOrders URL:', url.toString());
@@ -73,21 +75,22 @@ export default function HomeScreen() {
    pen: require('../../assets/images/pen.png'),
    tissue: require('../../assets/images/衛生紙.png'),
  };
+
  const router = useRouter();
  // 搜尋、商品、標籤、狀態管理
  const [searchText, setSearchText] = useState('');
  const [selectedTag, setSelectedTag] = useState(null);
- const [products, setProducts] = useState([]);
- const [tags, setTags] = useState([]);
+ const [products, setProducts] = useState<OrderFormType[]>([]);
+ const [tags, setTags] = useState<{ tag: string }[]>([]);
  const [loading, setLoading] = useState(false);
  const [error, setError] = useState(null);
- const [excludeOrderIds, setExcludeOrderIds] = useState([]);
+ const [excludeOrderIds, setExcludeOrderIds] = useState<string[]>([]);
 
 
  // 商品詳細 Modal
  const [modalVisible, setModalVisible] = useState(false);
  const [selectedProductId, setSelectedProductId] = useState(null);
- const [selectedProductDetail, setSelectedProductDetail] = useState(null);
+ const [selectedProductDetail, setSelectedProductDetail] = useState<OrderFormType | null>(null);
  const [detailLoading, setDetailLoading] = useState(false);
 
 
@@ -98,8 +101,8 @@ export default function HomeScreen() {
 
  // 搜尋紀錄 & 輔助
  const [isSearchActive, setIsSearchActive] = useState(false);
- const [searchRecords, setSearchRecords] = useState([]);
- const scrollRef = useRef(null);
+ const [searchRecords, setSearchRecords] = useState<string[]>([]);
+ const scrollRef = useRef<ScrollView>(null);
  const [searchWrapperY, setSearchWrapperY] = useState(0);
  const { username } = useAuth(); // 這裡 username 就是目前登入的用戶帳號
 
@@ -182,7 +185,7 @@ export default function HomeScreen() {
 
 
      // 1. 查詢參與者數量
-     const participantsUrl = `${apiUrl}/api/orders/${selectedProductId}`;
+     const participantsUrl = `${apiUrl}/api/orders/${selectedProductId}/participants`;
      console.log('GET participants URL:', participantsUrl);
      const resParticipants = await fetch(participantsUrl);
      const participantsText = await resParticipants.text();
@@ -190,16 +193,24 @@ export default function HomeScreen() {
 
 
      let participants = [];
-     try {
-       participants = JSON.parse(participantsText);
-     } catch (err) {
-       console.error('解析 participants 失敗，API 回傳不是 JSON:', participantsText);
-       alert('查詢參與者失敗，API 回傳不是 JSON！');
-       return;
-     }
+      try {
+        participants = JSON.parse(participantsText);
+        if (!Array.isArray(participants)) {
+          console.warn('⚠️ participants 不是陣列:', participants);
+          participants = [];
+        }
+      } catch (err) {
+        console.error('解析 participants 失敗:', participantsText);
+        alert('查詢參與者失敗，API 回傳格式錯誤！');
+        return;
+      }
+
+      const totalJoined = participants.reduce((acc, cur) => acc + Number(cur.quantity), 0);
 
 
-     const totalJoined = participants.reduce((acc, cur) => acc + Number(cur.quantity), 0);
+    //  const totalJoined = Array.isArray(participants)
+    // ? participants.reduce((acc, cur) => acc + Number(cur.quantity), 0)
+    // : 0;
      const stopAtNum = selectedProductDetail?.stop_at_num;
      console.log('已拼總數:', totalJoined, '最大可拼:', stopAtNum);
 
@@ -227,12 +238,12 @@ export default function HomeScreen() {
      const joinText = await res.text();
      console.log('join API 回應:', joinText);
 
-
      let data = {};
      try {
        data = JSON.parse(joinText);
      } catch (err) {
        console.error('join API 回傳不是 JSON:', joinText);
+       console.log('join API JSON:', data);
        alert('API 回傳不是 JSON，請檢查路徑與 server 狀態');
        return;
      }
@@ -252,6 +263,7 @@ export default function HomeScreen() {
          .catch((err) => setError(err.message));
      } else {
        alert(data.error || '加入拼單失敗');
+       console.log('❗ join API status:', res.status);
      }
    } catch (e) {
      alert('加入拼單失敗，請稍後再試');
@@ -448,7 +460,7 @@ export default function HomeScreen() {
              />
              <TouchableOpacity
                style={styles.modalSubmit}
-               onPress={() => handleJoinOrder( { quantity, message })}
+               onPress={() => handleJoinOrder({ quantity, message })}
              >
                <Text style={styles.modalSubmitText}>送出訂單</Text>
              </TouchableOpacity>

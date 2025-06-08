@@ -22,7 +22,10 @@ const Profile = () => {
         <Text className="text-xl font-bold text-secondary mt-4 mb-4">{userInfo.username}</Text>
 
         <View className="flex-1 justify-start gap-4 w-full px-8 py-4">
-          <TouchableOpacity onPress={() => router.push('/profile/info')}>
+          <TouchableOpacity onPress={() => router.push({
+            pathname: '/profile/info',
+            params: { from: '/profile' }
+          })}>
             <View className="bg-[#F1E6D8] flex-row items-center justify-between py-4 px-5 rounded-2xl">
               <View className="flex-row items-center">
                 <Ionicons name="person-outline" size={24} color="#8B6D5C" />
@@ -38,7 +41,10 @@ const Profile = () => {
               </View>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/profile/setting')}>
+          <TouchableOpacity onPress={() => router.push({
+            pathname: '/profile/setting',
+            params: { from: '/profile' }
+          })}>
             <View className="bg-[#F1E6D8] flex-row items-center justify-between py-4 px-5 rounded-2xl">
               <View className="flex-row items-center">
                 <Feather name="settings" size={24} color="#8B6D5C" />

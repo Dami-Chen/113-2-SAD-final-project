@@ -3,8 +3,10 @@
 import { View, Text, Switch, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 
 export default function SettingScreen() {
+  const { from } = useLocalSearchParams();
   const [notif1, setNotif1] = useState(false);
   const [notif2, setNotif2] = useState(false);
   const [notif3, setNotif3] = useState(false);
@@ -20,7 +22,17 @@ export default function SettingScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()}>
+      <TouchableOpacity
+        onPress={() => {
+          if (from) {
+            router.replace(from as `/profile` | `/profile/info` | `/profile/setting`); // 明確跳回
+          } else if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace('/profile');
+          }
+        }}
+      >
         <Text style={styles.back}>{'< 返回'}</Text>
       </TouchableOpacity>
 

@@ -14,10 +14,12 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { useAuth, OrderFormType, JoinOrderType, RegisterFormType } from '../../contexts/auth-context';  // Adjust path as needed
+import { useLocalSearchParams } from 'expo-router';
 
 
 export default function UserInfoScreen() {
   const router = useRouter();
+  const { from } = useLocalSearchParams();
   const [loading, setLoading] = useState<boolean>(false);
   const { openUserInfo, username, getHostInfo, updateUserInfo} = useAuth();
   const [userInfo, setUserInfo] = useState<RegisterFormType | null>(null);
@@ -110,7 +112,17 @@ export default function UserInfoScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <TouchableOpacity
+        onPress={() => {
+          if (from) {
+            router.replace(from as `/profile` | `/profile/info` | `/profile/setting`); // 明確跳回
+          } else if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace('/profile');
+          }
+        }}
+      >
         <Text style={styles.backText}>{'< 返回'}</Text>
       </TouchableOpacity>
 

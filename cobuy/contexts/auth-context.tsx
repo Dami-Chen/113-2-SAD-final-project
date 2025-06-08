@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import axios from 'axios';
 import { OneSignal } from 'react-native-onesignal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Notification from '../app/(tabs)/notification';
 
 
 interface AuthContextType {
@@ -76,6 +77,16 @@ export interface JoinOrderType {
   item_name: string;
   score: number;
   phone: string;
+}
+
+export interface NotificationItem {
+  notification_id: string;
+  recipient_username: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+  order_id?: string;
 }
 
 
@@ -202,7 +213,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const historyOrder = async (username: string | null) => {
     console.log('📌 username from query:', username);
     try {
-      const res = await axios.get(`${apiUrl}/users/${username}/orders`);
+      const res = await axios.get(`${apiUrl}/api/users/${username}/orders`);
       const allOrders = res.data;
       // console.log("✅ historyOrder API response:", res.data);  // Check if it's an array or object
 
@@ -350,7 +361,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{ isLoggedIn, isAuthReady, login, logout, username, register, form, setRegisterForm, // 傳出去，讓外面能更新
     createOrder, historyOrder, openOrderDetail, openJoinDetail, getParticipantByOrder, getHostInfo,
-    openUserInfo, updateUserInfo, reportAbandon}}>
+    openUserInfo, updateUserInfo, reportAbandon }}>
       {children}
     </AuthContext.Provider>
   );
