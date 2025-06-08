@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   setRegisterForm: React.Dispatch<React.SetStateAction<RegisterFormType>>;
+  form: RegisterFormType;
   register: (form: RegisterFormType) => Promise<void>;
   createOrder:(form: OrderFormType)  => Promise<void>;
   historyOrder: (username: string | null) => Promise<{openOrders: OrderFormType[];
@@ -78,10 +79,6 @@ export interface JoinOrderType {
 }
 
 
-
-
-
-
 const AuthContext = createContext<AuthContextType | null>(null);
 const apiUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
@@ -122,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (username: string, password: string) => {
     try {
-      await axios.post(`${apiUrl}/api/login`, { username, password });
+      await axios.post(`${apiUrl}/api/auth/login`, { username, password });
 
 
       setIsLoggedIn(true);
@@ -142,7 +139,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (form: RegisterFormType) => {
     try {
-      await axios.post(`${apiUrl}/api/register`, {
+      await axios.post(`${apiUrl}/api/users`, {
         ...form,
         score: 5,
       });
@@ -201,13 +198,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-
+ /////////////////////
   const historyOrder = async (username: string | null) => {
     console.log('📌 username from query:', username);
     try {
-      const res = await axios.get(`${apiUrl}/api/history_order`, {
-      params: { username }
-    });
+      const res = await axios.get(`${apiUrl}/users/${username}/orders`);
       const allOrders = res.data;
       // console.log("✅ historyOrder API response:", res.data);  // Check if it's an array or object
 
@@ -228,9 +223,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const openOrderDetail = async (username: string) => {
     try{
-      const res = await axios.get(`${apiUrl}/api/open_order`, {
-      params: { username }
-    });
+      const res = await axios.get(`${apiUrl}/api/users/${username}/orders?type=host`);
       console.log("✅ openOrderDetail API response:", res.data);
       return res.data;
       alert('成功查詢開團資料');
@@ -245,7 +238,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const openJoinDetail = async (order_id: string) => {
     try{
-      const res = await axios.get(`${apiUrl}/api/joined_order/${order_id}`);
+      const res = await axios.get(`${apiUrl}/api/orders/${order_id}/join-details`);
       console.log("📌 order_id from query:", order_id);
       console.log("✅ joinedOrder API response:", res.data);
       return res.data;
@@ -260,9 +253,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const getHostInfo = async (username: string) => {
     try{
-      const res = await axios.get(`${apiUrl}/api/order_host`, {
-      params: { username }
-    });
+      const res = await axios.get(`${apiUrl}/api/users/${username}`);
       console.log("✅ getHostInfo API response:", res.data);
       return res.data;
 
@@ -273,9 +264,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
  
   }
+
   const getParticipantByOrder = async (order_id: string) => {
     try{
-      const res = await axios.get(`${apiUrl}/api/orders/${order_id}`);
+      const res = await axios.get(`${apiUrl}/api/orders/${order_id}/participants`);
       console.log("✅ participantByOrder API response:", res.data);
       return res.data;
     } catch (err: any) {
@@ -288,9 +280,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   /// 個人資訊頁面
   const openUserInfo = async (username: string) => {
     try{
-      const res = await axios.get(`${apiUrl}/api/userInfo`, {
-      params: { username }
-    });
+      const res = await axios.get(`${apiUrl}/api/users/${username}`);
       console.log("✅ participantByOrder API response:", res.data);
       return res.data;
 
@@ -306,7 +296,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // 更新個人資訊
   const updateUserInfo = async (form: RegisterFormType) => {
     try{
-      await axios.post(`${apiUrl}/api/updateUserInfo`, {
+      await axios.put(`${apiUrl}/api/users/${username}`, {
         username,  // host_username
         real_name: form.real_name,
         email: form.email,
@@ -319,8 +309,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       console.log("❌ update user info error:", err);
       throw new Error(err.response?.data?.error || '更改個人資訊失敗');
-
-
     }
   }
 
@@ -337,7 +325,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log('📡 發送棄單請求:', payload);
 
       const response = await axios.post(
-        `${apiUrl}/api/abandonReport`,
+        `${apiUrl}/api/abandon-reports`,
         payload
       );
 

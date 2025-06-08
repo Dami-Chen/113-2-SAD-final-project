@@ -15,19 +15,6 @@ export default function Register() {
   const [showDormModal, setShowDormModal] = useState(false);
   const [selectedDorm, setSelectedDorm] = useState('');
 
-//   const [form, setForm] = useState<RegisterFormType>({
-//     username: '',
-//     password: '',
-//     nickname: '',
-//     real_name: '',
-//     email: '',
-//     school: '',
-//     student_id: '',
-//     dorm: '',
-//     phone: '',
-//     score: 5,
-//   });
-
   const [agree, setAgree] = useState(false);
 
   const handleChange = (key: keyof RegisterFormType, value: string) => {

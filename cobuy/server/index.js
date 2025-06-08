@@ -3,27 +3,32 @@ const app = express();
 const cors = require('cors');
 const http = require('http');
 const server = http.createServer(app);
-const authRoutes = require('./routes/auth');
-const orderRoutes = require('./routes/orders');
-const userRoutes = require('./routes/users');
-const indexRoutes = require('./routes/index');
-const notificationRoutes = require('./routes/notification');
-const { initWebSocket } = require('./ws');
 
 require('dotenv').config();
 
+// 路由載入
+const authRoutes = require('./routes/auth');
+const orderRoutes = require('./routes/orders');
+const userRoutes = require('./routes/users');
+const reportRoutes = require('./routes/report');
+const notificationRoutes = require('./routes/notification');
+const { initWebSocket } = require('./ws');
+
+// 中介層
 app.use(cors());
 app.use(express.json());
 
-app.use('/api', authRoutes);
-app.use('/api', orderRoutes);
-app.use('/api', userRoutes);
-app.use('/api', indexRoutes);
-app.use('/api', notificationRoutes);
+// RESTful 路由掛載
+app.use('/api/auth', authRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/abandon-reports', reportRoutes);
+app.use('/api/notifications', notificationRoutes);
 
-initWebSocket(server); // 初始化 WebSocket
+// 初始化 WebSocket
+initWebSocket(server);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

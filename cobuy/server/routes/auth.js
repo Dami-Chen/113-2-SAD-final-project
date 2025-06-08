@@ -3,40 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 const queries = require('../sql/queries');
 
-// 註冊
-router.post('/register', async (req, res) => {
-  const {
-    username,
-    nickname,
-    real_name,
-    password,
-    email,
-    school,
-    student_id,
-    dorm,
-    score,
-    phone,
-  } = req.body;
-  try {
-    await pool.query(queries.createUser, [
-      username,
-      nickname,
-      real_name,
-      password,
-      email,
-      school,
-      student_id,
-      dorm,
-      score,
-      phone,
-    ]);
-    res.status(201).json({ message: '註冊成功' });
-  } catch (err) {
-    res.status(500).json({ error: '註冊失敗', detail: err.message });
-  }
-});
-
-// 登入
+// ✅ 登入：POST /api/auth/login
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -44,7 +11,7 @@ router.post('/login', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(401).json({ error: '帳號或密碼錯誤' });
     }
-    res.json({ message: '登入成功', user: result.rows[0] });
+    res.status(200).json({ message: '登入成功', user: result.rows[0] });
   } catch (err) {
     res.status(500).json({ error: '登入失敗', detail: err.message });
   }

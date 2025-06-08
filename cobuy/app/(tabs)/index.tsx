@@ -34,9 +34,9 @@ async function fetchTags() {
 
 
 async function fetchOrders({ search, tag, page = 1, pageSize = 20 }) {
- const url = new URL(`${apiUrl}/api/ordersdetail`);
+ const url = new URL(`${apiUrl}/api/orders`);
  if (search) url.searchParams.append('search', search);
- if (tag) url.searchParams.append('tag', tag);
+ if (tag) url.searchParams.append('tag', String(tag));
  url.searchParams.append('page', page);
  url.searchParams.append('pageSize', pageSize);
 
@@ -51,7 +51,7 @@ async function fetchOrders({ search, tag, page = 1, pageSize = 20 }) {
 
 
 async function fetchOrderDetail(orderId) {
- const res = await fetch(`${apiUrl}/api/ordersdetail/${orderId}`);
+ const res = await fetch(`${apiUrl}/api/orders/${orderId}`);
  if (!res.ok) throw new Error('Failed to fetch detail');
  return res.json();
 }
@@ -118,7 +118,7 @@ export default function HomeScreen() {
  // 取得商品列表
  useEffect(() => {
  if (!username) return;
-   fetch(`${apiUrl}/api/history_order?username=${username}`)
+   fetch(`${apiUrl}/api/users/${username}/orders`)
      .then(res => res.json())
      .then(data => {
        // join 和 host 都過濾掉

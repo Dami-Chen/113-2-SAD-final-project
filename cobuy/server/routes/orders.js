@@ -2,12 +2,85 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const queries = require('../sql/queries');
-const { sendOneSignalNotification } = require('../onesignal');
 const { notifyViaWebSocket } = require('../ws');
 
+// 1. 取得訂單列表（含搜尋/標籤/分頁） → GET /api/orders
+router.get('/', async (req, res) => {
+  const { search = null, tag = null, page = 1, pageSize = 20 } = req.query;
+  const offset = (parseInt(page) - 1) * parseInt(pageSize);
+  const result = await pool.query(
+    queries.getAllOrdersWithJoinedCount,
+    [search, tag, pageSize, offset]
+  );
+  res.status(200).json(result.rows);
+});
 
-// 開團
-router.post('/orders', async (req, res) => {
+// 2. 熱門標籤 → GET /api/tags/popular
+router.get('/tags/popular', async (req, res) => {
+  const result = await pool.query(queries.getPopularTags);
+  res.status(200).json(result.rows);
+});
+
+// 3. 單一訂單詳細 → GET /api/orders/:id
+router.get('/:id', async (req, res) => {
+  const result = await pool.query(queries.getOrderById, [req.params.id]);
+  if (!result.rows.length) {
+    return res.status(404).json({ error: '找不到此訂單' });
+  }
+  res.status(200).json(result.rows[0]);
+});
+
+// 4. 加入團購（+留言）→ POST /api/orders/:id/join
+router.post('/:id/join', async (req, res) => {
+  const { username, quantity, message } = req.body;
+  const orderId = req.params.id;
+
+  await pool.query(queries.joinOrder, [username, orderId, quantity]);
+
+  if (message && message.trim() !== '') {
+    await pool.query(queries.createComment, [orderId, username, message]);
+  }
+
+  const orderRes = await pool.query('SELECT stop_at_num, item_name FROM orders WHERE order_id = $1', [orderId]);
+  const stopAtNum = orderRes.rows[0]?.stop_at_num;
+  const itemName = orderRes.rows[0]?.item_name;
+
+  const totalRes = await pool.query('SELECT SUM(quantity) AS total FROM joined_order WHERE order_id = $1', [orderId]);
+  const total = Number(totalRes.rows[0]?.total) || 0;
+
+  if (stopAtNum && total >= stopAtNum) {
+    const participantsRes = await pool.query('SELECT username FROM joined_order WHERE order_id = $1', [orderId]);
+    const usernames = participantsRes.rows.map(row => row.username);
+    const messageText = `你參加的訂單「${itemName || orderId}」已結單！`;
+
+    for (const uname of usernames) {
+      await pool.query(
+        `INSERT INTO notifications (recipient_username, title, message, order_id)
+         VALUES ($1, $2, $3, $4)`,
+        [uname, '有一筆新拼單結單', messageText, orderId]
+      );
+    }
+
+    notifyViaWebSocket(usernames, {
+      type: 'notification',
+      notification: {
+        title: '有一筆新拼單結單',
+        message: messageText,
+      }
+    });
+  }
+
+  res.status(200).json({ status: 'ok' });
+});
+
+// 5. 留言 → GET /api/orders/:id/comments
+router.get('/:id/comments', async (req, res) => {
+  const result = await pool.query(queries.getCommentsByOrder, [req.params.id]);
+  res.status(200).json(result.rows);
+});
+
+// 建立訂單
+router.post('/', async (req, res) => {
   const {
     username,
     item_name,
@@ -26,19 +99,11 @@ router.post('/orders', async (req, res) => {
     labels,
     delivery_time
   } = req.body;
+
   try {
     const result = await pool.query('SELECT MAX(order_id) AS max_id FROM orders');
-    let maxIdStr = result.rows[0].max_id;
-    // Convert string to int safely, fallback to 0 if null or invalid
-    let maxId = 0;
-    if (maxIdStr) {
-      maxId = parseInt(maxIdStr, 10);
-      if (isNaN(maxId)) maxId = 0;
-    }
-    const newOrderId = (maxId + 1).toString(); // convert back to string if needed
-
-
-
+    let maxId = parseInt(result.rows[0].max_id || '0', 10);
+    const newOrderId = (maxId + 1).toString();
 
     await pool.query(queries.createOrder, [
       newOrderId,
@@ -64,184 +129,47 @@ router.post('/orders', async (req, res) => {
     res.status(500).json({ error: '開團失敗', detail: err.message });
   }
 });
-/*
-// 查詢所有團購訂單
-router.get('/orders', async (req, res) => {
+
+// 查某訂單的參與者
+router.get('/:id/participants', async (req, res) => {
   try {
-    const result = await pool.query(queries.getAllOrders);
-    res.json(result.rows);
+    const result = await pool.query(queries.getParticipantsByOrder, [req.params.id]);
+    res.status(200).json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: '查詢失敗', detail: err.message });
-  }
-});*/
-
-
-
-
-// 查詢單一訂單
-router.get('/open_order', async (req, res) => {
-  const { username } = req.query;
-  try {
-    const result = await pool.query(queries.getOrdersByUser, [username]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: '找不到訂單' });
-    }
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: '查詢失敗', detail: err.message });
+    res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
   }
 });
 
-
-
-
-// 查詢使用者的所有訂單
-router.get('/history_order', async (req, res) => {
-  const { username } = req.query;
-  if (!username) {
-    console.error('❌ Missing username in /history_order request');
-    return res.status(400).json({ error: 'username' });
-  }
+// 查某訂單的拼單記錄
+router.get('/:id/join-details', async (req, res) => {
   try {
-    const hostResult = await pool.query(queries.getOrdersByUser, [username]);
-    const joinResult = await pool.query(queries.getOrdersJoinedByUser, [username]);
-   
-    const hostOrders = hostResult.rows.map(order => ({
-      ...order,
-      order_type: 'host',
-    }));
-
-
-
-
-    const joinOrders = joinResult.rows.map(order => ({
-      ...order,
-      order_type: 'join',
-    }));
-
-
-
-
-    // 3. 合併後回傳
-    const allOrders = [...hostOrders, ...joinOrders];
-    res.status(200).json(allOrders);
-  } catch (err) {
-    console.error('❌ Error in /history_order:', err);
-    res.status(500).json({ error: '查詢失敗', detail: err.message });
-  }
-});
-
-
-
-
-// 查某使用者參與的所有拼單
-router.get('/joined_order/:id', async (req, res) => {
-  const order_id = req.params.id;
-  try {
-    const result = await pool.query(queries.getOrderById, [order_id]);
+    const result = await pool.query(queries.getOrderById, [req.params.id]);
     res.status(200).json(result.rows);
   } catch (err) {
     res.status(500).json({ error: '查詢參與拼單失敗', detail: err.message });
   }
 });
 
-
-
-
-// 查某訂單的所有參與者
-router.get('/orders/:id', async (req, res) => {
+// 加入訂單
+router.post('/:id/join', async (req, res) => {
+  const { user_id, quantity } = req.body;
   const order_id = req.params.id;
   try {
-    const result = await pool.query(queries.getParticipantsByOrder, [order_id]);
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: '查詢參與者失敗', detail: err.message });
-  }
-});
-
-
-
-
-// 查某訂單的單主
-router.get('/order_host', async (req, res) => {
-  const { username } = req.query;
-  if (!username) {
-    return res.status(400).json({ error: '缺少 username' });
-  }
-  try {
-    const result = await pool.query(queries.getUserProfile, [username]);
-    res.json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: '查詢失敗', detail: err.message });
-  }
-});
-
-
-
-
-// 修改個人資訊
-router.post('/updateUserInfo', async (req, res) => {
-  const {
-    username,
-    real_name,
-    email,
-    school,
-    student_id,
-    dorm,
-  } = req.body;
- 
-  try {
-    await pool.query(queries.updateUserProfile, [
-      username,
-      real_name,
-      email,
-      school,
-      student_id,
-      dorm,
-    ]);
-    res.json({ success: true, message: '更新成功' });
-  } catch (err) {
-    console.error("❌ updateUserInfo error:", err);
-    res.status(500).json({ error: '更新失敗', detail: err.message });
-  }
-});
-
-
-// 加入訂單
-router.post('/join', async (req, res) => {
-  const { order_id, user_id, quantity } = req.body;
-  try {
     await pool.query(queries.joinOrder, [user_id, order_id, quantity]);
-
-
-
 
     // 查目前參加人數
     const { rows } = await pool.query(queries.getParticipantsByOrder, [order_id]);
     const participants = rows.map(r => r.username);
 
-
-
-
     // 查訂單上限
     const orderResult = await pool.query(queries.getOrderById, [order_id]);
     const limit = orderResult.rows[0].stop_at_num;
 
-
-
-
     if (participants.length >= limit) {
       const msg = `你參與的拼單已額滿！`;
-
-
-
-
       notifyViaWebSocket(participants, { type: 'GROUP_FULL', order_id });
       await sendOneSignalNotification(participants, msg);
     }
-
-
-
 
     res.status(201).json({ message: '已成功加入訂單' });
   } catch (err) {
@@ -249,39 +177,5 @@ router.post('/join', async (req, res) => {
   }
 });
 
-
-// 棄單
-router.post('/abandonReport', async (req, res) => {
-  const {
-    reporter_username,
-    target_username,
-    order_id,
-    reason,
-    reported_at,
-    status
-  } = req.body;
-
-
-  try {
-    const result = await pool.query(queries.insertAbandonReport, [
-    reporter_username,
-    target_username,
-    order_id,
-    reason,
-    reported_at,
-    status
-    ]);
-
-
-    res.status(200).json({ message: '報告成功送出', data: result.rows[0] });
-  } catch (error) {
-      console.error('❌ 棄單報告失敗:', error.stack); // 印出堆疊，看到是哪裡錯
-      res.status(500).json({ error: '伺服器錯誤：' + error.message });
-  }
-});
-
-
 module.exports = router;
-
-
 
