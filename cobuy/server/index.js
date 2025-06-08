@@ -10,7 +10,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const orderRoutes = require('./routes/orders');
 const userRoutes = require('./routes/users');
-const reportRoutes = require('./routes/report');
+const reportRoutes = require('./routes/reports');
 const notificationRoutes = require('./routes/notification');
 const { initWebSocket } = require('./ws');
 
