@@ -1,6 +1,6 @@
 # CoBuy —— Dorm Group-Buying System 宿舍團購媒合系統
 
-提供學生之間發起、參與與管理團購訂單的功能。系統分為前端（React Native + Expo）與後端（Node.js + Express），資料庫使用 PostgreSQL 並部署於 Railway。
+提供學生之間發起、參與與管理團購訂單的功能。系統分為前端（React Native + Expo）與後端（Node.js + Express），資料庫使用 PostgreSQL，資料庫及後端 server 皆部署於 Railway。
 
 ## 🚀 專案啟動流程
 
