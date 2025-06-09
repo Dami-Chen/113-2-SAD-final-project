@@ -36,7 +36,19 @@
 -  **通知系統**：顯示未讀與全部通知，支援點擊查看細節。
 -  **會員資料頁**：可修改宿舍、真實姓名、Email 等個人資訊。
 -  **深度整合 React Native 功能**：如 OneSignal 推播、lines、axios 擷取後端 API。
-
+  
+## 📚 OpenAPI 文件
+本專案使用 Swagger UI 搭配 OpenAPI 3.0 撰寫後端 API 文件，方便開發者快速查閱與測試各項 API 端點。
+若要開啟文件，請依下列步驟操作：
+```bash
+cd cobuy/server
+node index.js
+```
+啟動後端伺服器後，於瀏覽器開啟以下網址即可進入 Swagger 介面：
+```bash
+http://localhost:3001/api-docs
+```
+您可以在該介面查看每個 API 的請求方法、參數格式與回應內容，並可直接在頁面上發送測試請求，協助開發與除錯。
 
 ## 📁 專案重點結構
 ```bash
