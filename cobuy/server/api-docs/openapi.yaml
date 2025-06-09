@@ -236,42 +236,42 @@ paths:
           description: 數量超出限制
 
   /api/orders/{id}/comments:
-  get:
-    tags: [Orders]
-    summary: 查詢留言列表
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-    responses:
-      '200':
-        description: 留言資料
+    get:
+      tags: [Orders]
+      summary: 查詢留言列表
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 留言資料
 
 
   /api/orders/{id}/join-details:
-  get:
-    tags: [Orders]
-    summary: 查詢指定訂單的拼單資訊（留言用）
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-    responses:
-      '200':
-        description: 該訂單的留言拼單資訊
+    get:
+      tags: [Orders]
+      summary: 查詢指定訂單的拼單資訊（留言用）
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 該訂單的留言拼單資訊
 
 
   /api/orders/tags/popular:
-  get:
-    tags: [Orders]
-    summary: 取得熱門標籤
-    responses:
-      '200':
-        description: 標籤資料
+    get:
+      tags: [Orders]
+      summary: 取得熱門標籤
+      responses:
+        '200':
+          description: 標籤資料
 
 
   /api/notifications:

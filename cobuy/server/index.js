@@ -4,6 +4,10 @@ const cors = require('cors');
 const http = require('http');
 const server = http.createServer(app);
 
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./api-docs/openapi.yaml');
+
 require('dotenv').config();
 
 // 路由載入
@@ -24,6 +28,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/abandon-reports', reportRoutes);
 app.use('/api/notifications', notificationRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // 初始化 WebSocket
 initWebSocket(server);
