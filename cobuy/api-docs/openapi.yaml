@@ -1,0 +1,364 @@
+openapi: 3.0.0
+info:
+  title: CoBuy API
+  version: 1.0.0
+tags:
+  - name: Auth
+  - name: Users
+  - name: Orders
+  - name: Notifications
+  - name: Reports
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: 登入
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: 登入成功
+        '401':
+          description: 登入失敗
+
+  /api/users:
+    post:
+      tags: [Users]
+      summary: 註冊新使用者
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: 註冊成功
+        '500':
+          description: 註冊失敗
+
+  /api/users/{username}:
+    get:
+      tags: [Users]
+      summary: 取得使用者資料
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 使用者資料
+    put:
+      tags: [Users]
+      summary: 更新使用者資料
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                real_name:
+                  type: string
+                email:
+                  type: string
+                school:
+                  type: string
+                student_id:
+                  type: string
+                dorm:
+                  type: string
+      responses:
+        '200':
+          description: 更新成功
+
+  /api/users/{username}/orders:
+    get:
+      tags: [Users]
+      summary: 查詢使用者歷史訂單
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [host, join]
+      responses:
+        '200':
+          description: 成功查詢訂單
+
+  /api/orders:
+    get:
+      tags: [Orders]
+      summary: 查詢所有訂單（含搜尋與篩選）
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: tag
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 訂單清單
+    post:
+      tags: [Orders]
+      summary: 建立新訂單
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [order_id, host_username, item_name]
+              properties:
+                order_id:
+                  type: string
+                host_username:
+                  type: string
+                item_name:
+                  type: string
+                quantity:
+                  type: integer
+                total_price:
+                  type: number
+                unit_price:
+                  type: number
+                image_url:
+                  type: string
+                information:
+                  type: string
+                share_method:
+                  type: string
+                share_location:
+                  type: string
+                stop_at_num:
+                  type: integer
+                stop_at_date:
+                  type: string
+                  format: date
+                comment:
+                  type: string
+                hashtag:
+                  type: string
+                pay_method:
+                  type: string
+      responses:
+        '201':
+          description: 訂單建立成功
+
+  /api/orders/{id}:
+    get:
+      tags: [Orders]
+      summary: 查詢特定訂單參與者資訊
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 參與者資料
+
+  /api/orders/{id}/participants:
+    get:
+      tags: [Orders]
+      summary: 查詢訂單的拼單參與者清單
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 參與者資料
+
+  /api/orders/{id}/join:
+    post:
+      tags: [Orders]
+      summary: 加入拼單
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                quantity:
+                  type: integer
+                message:
+                  type: string
+      responses:
+        '200':
+          description: 加入成功
+        '400':
+          description: 數量超出限制
+
+  /api/orders/{id}/comments:
+  get:
+    tags: [Orders]
+    summary: 查詢留言列表
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: 留言資料
+
+
+  /api/orders/{id}/join-details:
+  get:
+    tags: [Orders]
+    summary: 查詢指定訂單的拼單資訊（留言用）
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: 該訂單的留言拼單資訊
+
+
+  /api/orders/tags/popular:
+  get:
+    tags: [Orders]
+    summary: 取得熱門標籤
+    responses:
+      '200':
+        description: 標籤資料
+
+
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      summary: 查詢使用者的通知
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 通知資料
+
+  /api/notifications/{id}/read:
+    post:
+      tags: [Notifications]
+      summary: 將通知設為已讀
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+      responses:
+        '200':
+          description: 標記成功
+
+  /api/abandon-reports:
+    post:
+      tags: [Reports]
+      summary: 新增棄單報告
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reporter_username:
+                  type: string
+                target_username:
+                  type: string
+                order_id:
+                  type: string
+                reason:
+                  type: string
+                reported_at:
+                  type: string
+                  format: date-time
+                status:
+                  type: string
+      responses:
+        '200':
+          description: 棄單報告成功提交
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        nickname:
+          type: string
+        real_name:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        school:
+          type: string
+        student_id:
+          type: string
+        dorm:
+          type: string
+        score:
+          type: integer
+        phone:
+          type: string
