@@ -1,5 +1,5 @@
 .idea/
-.node_modules/
-.ios/
+node_modules/
+ios/
 .expo/
-.android/
+android/
